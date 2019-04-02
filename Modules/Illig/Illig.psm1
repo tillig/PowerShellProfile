@@ -3,7 +3,7 @@
    Imports Visual Studio environment variables using a fallback method.
 .DESCRIPTION
    Looks at the VSPREFERRED variable to require a particular VS version;
-   otherwise falls back from 2017 through 2013 to invoke the developer
+   otherwise falls back from latest VS through 2010 to invoke the developer
    command prompt settings.
 .EXAMPLE
    Invoke-VisualStudioDevPrompt
@@ -23,25 +23,24 @@ function Invoke-VisualStudioDevPrompt {
         try {
             $ErrorActionPreference = "SilentlyContinue"
 
-            $vsLoaded = $False
-            if (-Not ($vsLoaded) -and ($env:VSPREFERRED -eq $NULL -or $env:VSPREFERRED -eq "2017")) {
-                $vs2017 = Select-Vs2017InstallPath
-                if ($vs2017 -ne $NULL) {
-                    Write-Verbose "Attempting VS 2017 load..."
-                    Invoke-BatchFile -Path "$vs2017\Common7\Tools\VsDevCmd.bat"
-                    $global:PromptEnvironment = " ⌂ vs2017 "
-                    $vsLoaded = $True
+            if ($NULL -eq $env:VSPREFERRED -or (-not $fallbackReleases.Contains($env:VSPREFERRED))) {
+                $vs = Select-VsInstall -Year "$($env:VSPREFERRED)"
+                if ($NULL -ne $vs) {
+                    Write-Verbose "Attempting VS load..."
+                    Invoke-BatchFile -Path "$($vs.InstallationPath)\Common7\Tools\VsDevCmd.bat"
+                    $vsYear = $vs.DisplayName -replace '.*\s+(\d\d\d\d).*', '${1}'
+                    $global:PromptEnvironment = " ⌂ vs$vsYear "
+                    return
                 }
             }
 
             foreach ($rel in $fallbackReleases)
             {
-                if (-Not ($vsLoaded) -and ($env:VSPREFERRED -eq $NULL -or $env:VSPREFERRED -eq $rel)) {
+                if ($NULL -eq $env:VSPREFERRED -or $env:VSPREFERRED -eq $rel) {
                     try
                     {
                         Write-Verbose "Attempting VS $rel load..."
                         Import-VisualStudioVars $rel
-                        $vsLoaded = $True
                         $global:PromptEnvironment = " ⌂ vs$rel "
                         break;
                     }
@@ -193,7 +192,7 @@ function Reset-Source
     }
     Process
     {
-        if($Source -eq $null -or $Source.Length -eq 0) {
+        if($NULL -eq $Source -or $Source.Length -eq 0) {
             & git clean -dfx
         }
         else {
@@ -208,20 +207,21 @@ function Reset-Source
 
 <#
 .Synopsis
-   Locates the VS 2017 standard install with the most features.
+   Locates the VS standard install with the most features.
 .DESCRIPTION
-   Looks at the standard install locations for the various VS 2017 SKUs and
+   Looks at the standard install locations for the various VS SKUs and
    returns the first found. Iterates through the SKUs from most to least
    featured. Requires the VSSetup module for the "Get-VsSetupInstance" command.
 .EXAMPLE
-   Select-Vs2017InstallPath
+   Select-VsInstall
 .EXAMPLE
-   Select-Vs2017InstallPath -Prerelease
+   Select-VsInstall -Prerelease
 #>
-function Select-Vs2017InstallPath {
+function Select-VsInstall {
     [CmdletBinding()]
     Param
     (
+        [string] $Year,
         [switch] $Prerelease
     )
     Begin
@@ -231,13 +231,20 @@ function Select-Vs2017InstallPath {
     }
     Process
     {
+        $availableInstalls = $vsInstalls
+        if (-not [System.String]::IsNullOrEmpty($Year)) {
+            Write-Verbose "Filtering list of VS installs by year [$Year]."
+            $availableInstalls = $availableInstalls | Where-Object { ($_.DisplayName -replace '.*\s+(\d\d\d\d).*', '${1}') -eq $Year }
+        }
         foreach($rel in $vsReleases) {
-            $found = $vsInstalls | Where-Object { $_.Product.Id -eq $rel } | Select-Object -First 1
-            if ($found -ne $NULL) {
-                return $found.InstallationPath
+            $found = $availableInstalls | Where-Object { $_.Product.Id -eq $rel } | Select-Object -First 1
+            if ($NULL -ne $found) {
+                Write-Verbose "Found $($found.DisplayName)."
+                return $found
             }
         }
 
+        Write-Verbose "No matching VS installs selected."
         return $NULL
     }
 }
