@@ -74,12 +74,10 @@ function Invoke-VisualStudioDevPrompt {
     Param
     (
     )
-    Begin
-    {
+    Begin {
         $fallbackReleases = @("2015", "2013", "2012", "2010")
     }
-    Process
-    {
+    Process {
         $origErrorAction = $ErrorActionPreference
         try {
             $ErrorActionPreference = "SilentlyContinue"
@@ -95,11 +93,9 @@ function Invoke-VisualStudioDevPrompt {
                 }
             }
 
-            foreach ($rel in $fallbackReleases)
-            {
+            foreach ($rel in $fallbackReleases) {
                 if ($NULL -eq $env:VSPREFERRED -or $env:VSPREFERRED -eq $rel) {
-                    try
-                    {
+                    try {
                         Write-Verbose "Attempting VS $rel load..."
                         Import-VisualStudioVars $rel
                         $global:PromptEnvironment = " ⌂ vs$rel "
@@ -108,9 +104,11 @@ function Invoke-VisualStudioDevPrompt {
                     catch { }
                 }
             }
-        } catch [Exception]{
+        }
+        catch [Exception] {
             Write-Warning "Unable to initialize VS command settings."
-        } finally {
+        }
+        finally {
             $ErrorActionPreference = $origErrorAction
         }
     }
@@ -119,6 +117,10 @@ function Invoke-VisualStudioDevPrompt {
 <#
 .Synopsis
    Creates a new machine key element for use in web.config files.
+.PARAMETER Decryption
+   Indicates the decryption algorithm that should be used for the machine key: AES, DES, 3DES.
+.PARAMETER Validation
+   Indicates the request validation algorithm that should be used: MD5, SHA1, HMACSHA256, HMACSHA384, HMACSHA512.
 .DESCRIPTION
    Generates new machine key data in XML element format that can be used in a web.config file in an ASP.NET web site.
 .EXAMPLE
@@ -126,8 +128,7 @@ function Invoke-VisualStudioDevPrompt {
 .EXAMPLE
    New-MachineKey -Validation SHA1
 #>
-function New-MachineKey
-{
+function New-MachineKey {
     [CmdletBinding(HelpUri = 'https://support.microsoft.com/en-us/kb/2915218#AppendixA')]
     [OutputType([String])]
     Param
@@ -139,24 +140,20 @@ function New-MachineKey
         [switch]$PrettyPrint
     )
 
-    Process
-    {
+    Process {
         function BinaryToHex {
             [CmdLetBinding()]
             Param($bytes)
-            Process
-            {
+            Process {
                 $builder = new-object System.Text.StringBuilder
-                foreach ($b in $bytes)
-                {
+                foreach ($b in $bytes) {
                     $builder = $builder.AppendFormat([System.Globalization.CultureInfo]::InvariantCulture, "{0:X2}", $b)
                 }
                 $builder
             }
         }
 
-        switch ($Decryption)
-        {
+        switch ($Decryption) {
             "AES" { $decryptionObject = new-object System.Security.Cryptography.AesCryptoServiceProvider }
             "DES" { $decryptionObject = new-object System.Security.Cryptography.DESCryptoServiceProvider }
             "3DES" { $decryptionObject = new-object System.Security.Cryptography.TripleDESCryptoServiceProvider }
@@ -166,8 +163,7 @@ function New-MachineKey
         $decryptionKey = BinaryToHex($decryptionObject.Key)
         $decryptionObject.Dispose()
 
-        switch ($Validation)
-        {
+        switch ($Validation) {
             "MD5" { $validationObject = new-object System.Security.Cryptography.HMACMD5 }
             "SHA1" { $validationObject = new-object System.Security.Cryptography.HMACSHA1 }
             "HMACSHA256" { $validationObject = new-object System.Security.Cryptography.HMACSHA256 }
@@ -177,12 +173,10 @@ function New-MachineKey
 
         $validationKey = BinaryToHex($validationObject.Key)
         $validationObject.Dispose()
-        if($PrettyPrint)
-        {
+        if ($PrettyPrint) {
             $space = [System.Environment]::NewLine + "            "
         }
-        else
-        {
+        else {
             $space = " "
         }
 
@@ -204,15 +198,13 @@ function New-MachineKey
 .EXAMPLE
    Remove-TempFiles
 #>
-function Remove-TempFiles
-{
-    [CmdletBinding(SupportsShouldProcess=$true)]
+function Remove-TempFiles {
+    [CmdletBinding(SupportsShouldProcess = $true)]
     Param
     (
     )
 
-    Begin
-    {
+    Begin {
         $tempFolders = @(
             $env:TEMP,
             "$($env:LOCALAPPDATA)\Temp",
@@ -221,8 +213,7 @@ function Remove-TempFiles
             "$($env:windir)\Microsoft.NET\Framework64\v2.0.50727\Temporary ASP.NET Files",
             "$($env:windir)\Microsoft.NET\Framework64\v4.0.30319\Temporary ASP.NET Files")
     }
-    Process
-    {
+    Process {
         foreach ($tempFolder in $tempFolders) {
             if ((Test-Path $tempFolder) -and ($pscmdlet.ShouldProcess("$tempFolder", "Remove items from temporary folder"))) {
                 Get-ChildItem $tempFolder | Remove-Item -Force -Recurse
@@ -239,25 +230,22 @@ function Remove-TempFiles
 .EXAMPLE
    Reset-Source
 #>
-function Reset-Source
-{
+function Reset-Source {
     [CmdletBinding()]
     Param
     (
-        [Parameter(Position=0, ValueFromPipeline=$true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true)]
         [System.IO.DirectoryInfo[]] $Source
     )
-    Begin
-    {
+    Begin {
         & nuget locals -clear all
     }
-    Process
-    {
-        if($NULL -eq $Source -or $Source.Length -eq 0) {
+    Process {
+        if ($NULL -eq $Source -or $Source.Length -eq 0) {
             & git clean -dfx
         }
         else {
-            foreach($path in $Source) {
+            foreach ($path in $Source) {
                 Push-Location $path
                 & git clean -dfx
                 Pop-Location
@@ -285,19 +273,17 @@ function Select-VsInstall {
         [string] $Year,
         [switch] $Prerelease
     )
-    Begin
-    {
+    Begin {
         $vsReleases = @("Microsoft.VisualStudio.Product.Enterprise", "Microsoft.VisualStudio.Product.Professional", "Microsoft.VisualStudio.Product.Community")
         $vsInstalls = Get-VsSetupInstance -All -Prerelease:$Prerelease | Sort-Object -Property @{ Expression = { $_.Product.Version } } -Descending
     }
-    Process
-    {
+    Process {
         $availableInstalls = $vsInstalls
         if (-not [System.String]::IsNullOrEmpty($Year)) {
             Write-Verbose "Filtering list of VS installs by year [$Year]."
             $availableInstalls = $availableInstalls | Where-Object { ($_.DisplayName -replace '.*\s+(\d\d\d\d).*', '${1}') -eq $Year }
         }
-        foreach($rel in $vsReleases) {
+        foreach ($rel in $vsReleases) {
             $found = $availableInstalls | Where-Object { $_.Product.Id -eq $rel } | Select-Object -First 1
             if ($NULL -ne $found) {
                 Write-Verbose "Found $($found.DisplayName)."
@@ -326,16 +312,15 @@ function Set-ConsoleEncoding {
     [CmdletBinding()]
     Param
     (
-        [Parameter(ParameterSetName="Unicode")]
+        [Parameter(ParameterSetName = "Unicode")]
         [Switch]
         $UTF8,
 
-        [Parameter(ParameterSetName="Default")]
+        [Parameter(ParameterSetName = "Default")]
         [Switch]
         $Default
     )
-    Process
-    {
+    Process {
         if ($Default) {
             [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(437)
         }
