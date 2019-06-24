@@ -208,6 +208,7 @@ function Remove-TempFiles {
         $tempFolders = @(
             $env:TEMP,
             "$($env:LOCALAPPDATA)\Temp",
+            "$($env:windir)\Temp",
             "$($env:windir)\Microsoft.NET\Framework\v2.0.50727\Temporary ASP.NET Files",
             "$($env:windir)\Microsoft.NET\Framework\v4.0.30319\Temporary ASP.NET Files",
             "$($env:windir)\Microsoft.NET\Framework64\v2.0.50727\Temporary ASP.NET Files",
