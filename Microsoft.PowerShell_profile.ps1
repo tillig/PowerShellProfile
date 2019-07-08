@@ -43,7 +43,7 @@ $global:GitPromptSettings.AfterStatus.Text = " "
 $global:GitPromptSettings.BeforeStatus.Text = "  "
 $global:GitPromptSettings.BranchIdenticalStatusSymbol.Text = ""
 $global:GitPromptSettings.BranchUntrackedText = "◇ "
-$global:GitPromptSettings.DelimStatus.Text = " ॥"
+$global:GitPromptSettings.DelimStatus.Text = " ║"
 $global:GitPromptSettings.LocalStagedStatusSymbol.Text = ""
 $global:GitPromptSettings.LocalWorkingStatusSymbol.Text = ""
 
