@@ -3,3 +3,6 @@ ISE/**
 Modules/**
 Reference/**
 Scripts/**
+
+!Modules/Illig
+!Modules/Illig/**
