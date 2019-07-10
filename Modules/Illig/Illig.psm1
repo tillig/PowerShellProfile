@@ -5,6 +5,7 @@
 . $PSScriptRoot\Kubernetes\Get-KubectlAll.ps1
 . $PSScriptRoot\Kubernetes\Get-KubectlShell.ps1
 . $PSScriptRoot\Terminal\Set-ConsoleEncoding.ps1
+. $PSScriptRoot\Terminal\Test-AnsiSupport.ps1
 
 $exportModuleMemberParams = @{
     Function = @(
@@ -15,7 +16,8 @@ $exportModuleMemberParams = @{
         'Remove-TempFiles',
         'Reset-Source',
         'Select-VsInstall',
-        'Set-ConsoleEncoding'
+        'Set-ConsoleEncoding',
+        'Test-AnsiSupport'
     )
 }
 

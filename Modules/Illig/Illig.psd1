@@ -27,7 +27,8 @@
         'Remove-TempFiles',
         'Reset-Source',
         'Select-VsInstall',
-        'Set-ConsoleEncoding'
+        'Set-ConsoleEncoding',
+        'Test-AnsiSupport'
     )
 
     # Cmdlets to export from this module

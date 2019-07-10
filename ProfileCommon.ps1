@@ -5,9 +5,10 @@ Import-Module posh-git
 Import-Module VSSetup
 Import-Module Illig
 
-# Windows defaults to ASCII
+# Windows defaults to ASCII; set UTF-8 and verify ANSI color support.
 Set-ConsoleEncoding -UTF8
 $Env:PYTHONIOENCODING = "UTF-8"
+Test-AnsiSupport | Out-Null
 
 # Import VS environment
 Invoke-VisualStudioDevPrompt
