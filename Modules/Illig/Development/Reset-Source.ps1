@@ -14,7 +14,17 @@ function Reset-Source {
         [System.IO.DirectoryInfo[]] $Source
     )
     Begin {
-        & nuget locals -clear all
+        Get-Command nuget -ErrorAction Ignore | Out-Null
+        if ($?) {
+            & nuget locals -clear all
+        }
+        else {
+            Write-Warning 'NuGet not found on path. Unable to clear NuGet cache.'
+        }
+        Get-Command git -ErrorAction Ignore | Out-Null
+        if (-not $?) {
+            throw 'Git not found on path. Unable to reset source.'
+        }
     }
     Process {
         if ($NULL -eq $Source -or $Source.Length -eq 0) {
