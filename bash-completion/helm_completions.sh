@@ -1,6 +1,6 @@
 # bash completion for helm                                 -*- shell-script -*-
 
-__debug()
+__helm_debug()
 {
     if [[ -n ${BASH_COMP_DEBUG_FILE} ]]; then
         echo "$*" >> "${BASH_COMP_DEBUG_FILE}"
@@ -9,13 +9,13 @@ __debug()
 
 # Homebrew on Macs have version 1.3 of bash-completion which doesn't include
 # _init_completion. This is a very minimal version of that function.
-__my_init_completion()
+__helm_init_completion()
 {
     COMPREPLY=()
     _get_comp_words_by_ref "$@" cur prev words cword
 }
 
-__index_of_word()
+__helm_index_of_word()
 {
     local w word=$1
     shift
@@ -27,7 +27,7 @@ __index_of_word()
     index=-1
 }
 
-__contains_word()
+__helm_contains_word()
 {
     local w word=$1; shift
     for w in "$@"; do
@@ -36,9 +36,9 @@ __contains_word()
     return 1
 }
 
-__handle_reply()
+__helm_handle_reply()
 {
-    __debug "${FUNCNAME[0]}"
+    __helm_debug "${FUNCNAME[0]}"
     case $cur in
         -*)
             if [[ $(type -t compopt) = "builtin" ]]; then
@@ -62,15 +62,15 @@ __handle_reply()
                 fi
 
                 local index flag
-                flag="${cur%%=*}"
-                __index_of_word "${flag}" "${flags_with_completion[@]}"
+                flag="${cur%=*}"
+                __helm_index_of_word "${flag}" "${flags_with_completion[@]}"
+                COMPREPLY=()
                 if [[ ${index} -ge 0 ]]; then
-                    COMPREPLY=()
                     PREFIX=""
                     cur="${cur#*=}"
                     ${flags_completion[${index}]}
                     if [ -n "${ZSH_VERSION}" ]; then
-                        # zfs completion needs --flag= prefix
+                        # zsh completion needs --flag= prefix
                         eval "COMPREPLY=( \"\${COMPREPLY[@]/#/${flag}=}\" )"
                     fi
                 fi
@@ -81,7 +81,7 @@ __handle_reply()
 
     # check if we are handling a flag with special work handling
     local index
-    __index_of_word "${prev}" "${flags_with_completion[@]}"
+    __helm_index_of_word "${prev}" "${flags_with_completion[@]}"
     if [[ ${index} -ge 0 ]]; then
         ${flags_completion[${index}]}
         return
@@ -107,28 +107,43 @@ __handle_reply()
     fi
 
     if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
-        declare -F __custom_func >/dev/null && __custom_func
+		if declare -F __helm_custom_func >/dev/null; then
+			# try command name qualified custom func
+			__helm_custom_func
+		else
+			# otherwise fall back to unqualified for compatibility
+			declare -F ___custom_func >/dev/null && __custom_func
+		fi
     fi
 
-    __ltrim_colon_completions "$cur"
+    # available in bash-completion >= 2, not always present on macOS
+    if declare -F __ltrim_colon_completions >/dev/null; then
+        __ltrim_colon_completions "$cur"
+    fi
+
+    # If there is only 1 completion and it is a flag with an = it will be completed
+    # but we don't want a space after the =
+    if [[ "${#COMPREPLY[@]}" -eq "1" ]] && [[ $(type -t compopt) = "builtin" ]] && [[ "${COMPREPLY[0]}" == --*= ]]; then
+       compopt -o nospace
+    fi
 }
 
 # The arguments should be in the form "ext1|ext2|extn"
-__handle_filename_extension_flag()
+__helm_handle_filename_extension_flag()
 {
     local ext="$1"
     _filedir "@(${ext})"
 }
 
-__handle_subdirs_in_dir_flag()
+__helm_handle_subdirs_in_dir_flag()
 {
     local dir="$1"
     pushd "${dir}" >/dev/null 2>&1 && _filedir -d && popd >/dev/null 2>&1
 }
 
-__handle_flag()
+__helm_handle_flag()
 {
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __helm_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
 
     # if a command required a flag, and we found it, unset must_have_one_flag()
     local flagname=${words[c]}
@@ -136,30 +151,33 @@ __handle_flag()
     # if the word contained an =
     if [[ ${words[c]} == *"="* ]]; then
         flagvalue=${flagname#*=} # take in as flagvalue after the =
-        flagname=${flagname%%=*} # strip everything after the =
+        flagname=${flagname%=*} # strip everything after the =
         flagname="${flagname}=" # but put the = back
     fi
-    __debug "${FUNCNAME[0]}: looking for ${flagname}"
-    if __contains_word "${flagname}" "${must_have_one_flag[@]}"; then
+    __helm_debug "${FUNCNAME[0]}: looking for ${flagname}"
+    if __helm_contains_word "${flagname}" "${must_have_one_flag[@]}"; then
         must_have_one_flag=()
     fi
 
     # if you set a flag which only applies to this command, don't show subcommands
-    if __contains_word "${flagname}" "${local_nonpersistent_flags[@]}"; then
+    if __helm_contains_word "${flagname}" "${local_nonpersistent_flags[@]}"; then
       commands=()
     fi
 
     # keep flag value with flagname as flaghash
-    if [ -n "${flagvalue}" ] ; then
-        flaghash[${flagname}]=${flagvalue}
-    elif [ -n "${words[ $((c+1)) ]}" ] ; then
-        flaghash[${flagname}]=${words[ $((c+1)) ]}
-    else
-        flaghash[${flagname}]="true" # pad "true" for bool flag
+    # flaghash variable is an associative array which is only supported in bash > 3.
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        if [ -n "${flagvalue}" ] ; then
+            flaghash[${flagname}]=${flagvalue}
+        elif [ -n "${words[ $((c+1)) ]}" ] ; then
+            flaghash[${flagname}]=${words[ $((c+1)) ]}
+        else
+            flaghash[${flagname}]="true" # pad "true" for bool flag
+        fi
     fi
 
     # skip the argument to a two word flag
-    if __contains_word "${words[c]}" "${two_word_flags[@]}"; then
+    if __helm_contains_word "${words[c]}" "${two_word_flags[@]}"; then
         c=$((c+1))
         # if we are looking for a flags value, don't show commands
         if [[ $c -eq $cword ]]; then
@@ -171,13 +189,13 @@ __handle_flag()
 
 }
 
-__handle_noun()
+__helm_handle_noun()
 {
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __helm_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
 
-    if __contains_word "${words[c]}" "${must_have_one_noun[@]}"; then
+    if __helm_contains_word "${words[c]}" "${must_have_one_noun[@]}"; then
         must_have_one_noun=()
-    elif __contains_word "${words[c]}" "${noun_aliases[@]}"; then
+    elif __helm_contains_word "${words[c]}" "${noun_aliases[@]}"; then
         must_have_one_noun=()
     fi
 
@@ -185,47 +203,58 @@ __handle_noun()
     c=$((c+1))
 }
 
-__handle_command()
+__helm_handle_command()
 {
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __helm_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
 
     local next_command
     if [[ -n ${last_command} ]]; then
         next_command="_${last_command}_${words[c]//:/__}"
     else
         if [[ $c -eq 0 ]]; then
-            next_command="_$(basename "${words[c]//:/__}")"
+            next_command="_helm_root_command"
         else
             next_command="_${words[c]//:/__}"
         fi
     fi
     c=$((c+1))
-    __debug "${FUNCNAME[0]}: looking for ${next_command}"
-    declare -F $next_command >/dev/null && $next_command
+    __helm_debug "${FUNCNAME[0]}: looking for ${next_command}"
+    declare -F "$next_command" >/dev/null && $next_command
 }
 
-__handle_word()
+__helm_handle_word()
 {
     if [[ $c -ge $cword ]]; then
-        __handle_reply
+        __helm_handle_reply
         return
     fi
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __helm_debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
     if [[ "${words[c]}" == -* ]]; then
-        __handle_flag
-    elif __contains_word "${words[c]}" "${commands[@]}"; then
-        __handle_command
-    elif [[ $c -eq 0 ]] && __contains_word "$(basename "${words[c]}")" "${commands[@]}"; then
-        __handle_command
+        __helm_handle_flag
+    elif __helm_contains_word "${words[c]}" "${commands[@]}"; then
+        __helm_handle_command
+    elif [[ $c -eq 0 ]]; then
+        __helm_handle_command
+    elif __helm_contains_word "${words[c]}" "${command_aliases[@]}"; then
+        # aliashash variable is an associative array which is only supported in bash > 3.
+        if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+            words[c]=${aliashash[${words[c]}]}
+            __helm_handle_command
+        else
+            __helm_handle_noun
+        fi
     else
-        __handle_noun
+        __helm_handle_noun
     fi
-    __handle_word
+    __helm_handle_word
 }
 
 _helm_completion()
 {
     last_command="helm_completion"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -234,10 +263,14 @@ _helm_completion()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--help")
+    flags+=("-h")
+    local_nonpersistent_flags+=("--help")
     flags+=("--debug")
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -251,6 +284,9 @@ _helm_completion()
 _helm_create()
 {
     last_command="helm_create"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -266,6 +302,7 @@ _helm_create()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -277,6 +314,9 @@ _helm_create()
 _helm_delete()
 {
     last_command="helm_delete"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -285,6 +325,8 @@ _helm_delete()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--description=")
+    local_nonpersistent_flags+=("--description=")
     flags+=("--dry-run")
     local_nonpersistent_flags+=("--dry-run")
     flags+=("--no-hooks")
@@ -299,6 +341,8 @@ _helm_delete()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -307,6 +351,7 @@ _helm_delete()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -318,6 +363,9 @@ _helm_delete()
 _helm_dependency_build()
 {
     last_command="helm_dependency_build"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -334,6 +382,7 @@ _helm_dependency_build()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -345,6 +394,9 @@ _helm_dependency_build()
 _helm_dependency_list()
 {
     last_command="helm_dependency_list"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -357,6 +409,7 @@ _helm_dependency_list()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -368,6 +421,9 @@ _helm_dependency_list()
 _helm_dependency_update()
 {
     last_command="helm_dependency_update"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -386,6 +442,7 @@ _helm_dependency_update()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -397,10 +454,21 @@ _helm_dependency_update()
 _helm_dependency()
 {
     last_command="helm_dependency"
+
+    command_aliases=()
+
     commands=()
     commands+=("build")
     commands+=("list")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("ls")
+        aliashash["ls"]="list"
+    fi
     commands+=("update")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("up")
+        aliashash["up"]="update"
+    fi
 
     flags=()
     two_word_flags=()
@@ -412,6 +480,7 @@ _helm_dependency()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -423,6 +492,9 @@ _helm_dependency()
 _helm_fetch()
 {
     last_command="helm_fetch"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -464,6 +536,7 @@ _helm_fetch()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -475,6 +548,9 @@ _helm_fetch()
 _helm_get_hooks()
 {
     last_command="helm_get_hooks"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -491,6 +567,8 @@ _helm_get_hooks()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -499,6 +577,7 @@ _helm_get_hooks()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -510,6 +589,9 @@ _helm_get_hooks()
 _helm_get_manifest()
 {
     last_command="helm_get_manifest"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -526,6 +608,8 @@ _helm_get_manifest()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -534,6 +618,48 @@ _helm_get_manifest()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
+    flags+=("--tiller-connection-timeout=")
+    flags+=("--tiller-namespace=")
+
+    must_have_one_flag=()
+    must_have_one_noun=()
+    noun_aliases=()
+}
+
+_helm_get_notes()
+{
+    last_command="helm_get_notes"
+
+    command_aliases=()
+
+    commands=()
+
+    flags=()
+    two_word_flags=()
+    local_nonpersistent_flags=()
+    flags_with_completion=()
+    flags_completion=()
+
+    flags+=("--revision=")
+    local_nonpersistent_flags+=("--revision=")
+    flags+=("--tls")
+    local_nonpersistent_flags+=("--tls")
+    flags+=("--tls-ca-cert=")
+    local_nonpersistent_flags+=("--tls-ca-cert=")
+    flags+=("--tls-cert=")
+    local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
+    flags+=("--tls-key=")
+    local_nonpersistent_flags+=("--tls-key=")
+    flags+=("--tls-verify")
+    local_nonpersistent_flags+=("--tls-verify")
+    flags+=("--debug")
+    flags+=("--home=")
+    flags+=("--host=")
+    flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -545,6 +671,9 @@ _helm_get_manifest()
 _helm_get_values()
 {
     last_command="helm_get_values"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -556,6 +685,8 @@ _helm_get_values()
     flags+=("--all")
     flags+=("-a")
     local_nonpersistent_flags+=("--all")
+    flags+=("--output=")
+    local_nonpersistent_flags+=("--output=")
     flags+=("--revision=")
     local_nonpersistent_flags+=("--revision=")
     flags+=("--tls")
@@ -564,6 +695,8 @@ _helm_get_values()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -572,6 +705,7 @@ _helm_get_values()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -583,9 +717,13 @@ _helm_get_values()
 _helm_get()
 {
     last_command="helm_get"
+
+    command_aliases=()
+
     commands=()
     commands+=("hooks")
     commands+=("manifest")
+    commands+=("notes")
     commands+=("values")
 
     flags=()
@@ -596,12 +734,16 @@ _helm_get()
 
     flags+=("--revision=")
     local_nonpersistent_flags+=("--revision=")
+    flags+=("--template=")
+    local_nonpersistent_flags+=("--template=")
     flags+=("--tls")
     local_nonpersistent_flags+=("--tls")
     flags+=("--tls-ca-cert=")
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -610,6 +752,7 @@ _helm_get()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -621,6 +764,9 @@ _helm_get()
 _helm_history()
 {
     last_command="helm_history"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -642,6 +788,8 @@ _helm_history()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -650,6 +798,7 @@ _helm_history()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -661,6 +810,9 @@ _helm_history()
 _helm_home()
 {
     last_command="helm_home"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -673,6 +825,7 @@ _helm_home()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -684,6 +837,9 @@ _helm_home()
 _helm_init()
 {
     last_command="helm_init"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -692,6 +848,8 @@ _helm_init()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--automount-service-account-token")
+    local_nonpersistent_flags+=("--automount-service-account-token")
     flags+=("--canary-image")
     local_nonpersistent_flags+=("--canary-image")
     flags+=("--client-only")
@@ -729,6 +887,8 @@ _helm_init()
     local_nonpersistent_flags+=("--tiller-tls")
     flags+=("--tiller-tls-cert=")
     local_nonpersistent_flags+=("--tiller-tls-cert=")
+    flags+=("--tiller-tls-hostname=")
+    local_nonpersistent_flags+=("--tiller-tls-hostname=")
     flags+=("--tiller-tls-key=")
     local_nonpersistent_flags+=("--tiller-tls-key=")
     flags+=("--tiller-tls-verify")
@@ -743,6 +903,7 @@ _helm_init()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -754,6 +915,9 @@ _helm_init()
 _helm_inspect_chart()
 {
     last_command="helm_inspect_chart"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -766,6 +930,8 @@ _helm_inspect_chart()
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--devel")
+    local_nonpersistent_flags+=("--devel")
     flags+=("--key-file=")
     local_nonpersistent_flags+=("--key-file=")
     flags+=("--keyring=")
@@ -784,6 +950,7 @@ _helm_inspect_chart()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -795,6 +962,9 @@ _helm_inspect_chart()
 _helm_inspect_readme()
 {
     last_command="helm_inspect_readme"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -807,6 +977,8 @@ _helm_inspect_readme()
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--devel")
+    local_nonpersistent_flags+=("--devel")
     flags+=("--key-file=")
     local_nonpersistent_flags+=("--key-file=")
     flags+=("--keyring=")
@@ -821,6 +993,7 @@ _helm_inspect_readme()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -832,6 +1005,9 @@ _helm_inspect_readme()
 _helm_inspect_values()
 {
     last_command="helm_inspect_values"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -844,6 +1020,8 @@ _helm_inspect_values()
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--devel")
+    local_nonpersistent_flags+=("--devel")
     flags+=("--key-file=")
     local_nonpersistent_flags+=("--key-file=")
     flags+=("--keyring=")
@@ -862,6 +1040,7 @@ _helm_inspect_values()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -873,6 +1052,9 @@ _helm_inspect_values()
 _helm_inspect()
 {
     last_command="helm_inspect"
+
+    command_aliases=()
+
     commands=()
     commands+=("chart")
     commands+=("readme")
@@ -888,6 +1070,8 @@ _helm_inspect()
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--devel")
+    local_nonpersistent_flags+=("--devel")
     flags+=("--key-file=")
     local_nonpersistent_flags+=("--key-file=")
     flags+=("--keyring=")
@@ -906,6 +1090,7 @@ _helm_inspect()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -917,6 +1102,9 @@ _helm_inspect()
 _helm_install()
 {
     last_command="helm_install"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -925,12 +1113,16 @@ _helm_install()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--atomic")
+    local_nonpersistent_flags+=("--atomic")
     flags+=("--ca-file=")
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
     flags+=("--dep-up")
     local_nonpersistent_flags+=("--dep-up")
+    flags+=("--description=")
+    local_nonpersistent_flags+=("--description=")
     flags+=("--devel")
     local_nonpersistent_flags+=("--devel")
     flags+=("--dry-run")
@@ -946,16 +1138,22 @@ _helm_install()
     local_nonpersistent_flags+=("--name-template=")
     flags+=("--namespace=")
     local_nonpersistent_flags+=("--namespace=")
+    flags+=("--no-crd-hook")
+    local_nonpersistent_flags+=("--no-crd-hook")
     flags+=("--no-hooks")
     local_nonpersistent_flags+=("--no-hooks")
     flags+=("--password=")
     local_nonpersistent_flags+=("--password=")
+    flags+=("--render-subchart-notes")
+    local_nonpersistent_flags+=("--render-subchart-notes")
     flags+=("--replace")
     local_nonpersistent_flags+=("--replace")
     flags+=("--repo=")
     local_nonpersistent_flags+=("--repo=")
     flags+=("--set=")
     local_nonpersistent_flags+=("--set=")
+    flags+=("--set-file=")
+    local_nonpersistent_flags+=("--set-file=")
     flags+=("--set-string=")
     local_nonpersistent_flags+=("--set-string=")
     flags+=("--timeout=")
@@ -966,6 +1164,8 @@ _helm_install()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -985,6 +1185,7 @@ _helm_install()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -996,6 +1197,9 @@ _helm_install()
 _helm_lint()
 {
     last_command="helm_lint"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1008,6 +1212,8 @@ _helm_lint()
     local_nonpersistent_flags+=("--namespace=")
     flags+=("--set=")
     local_nonpersistent_flags+=("--set=")
+    flags+=("--set-file=")
+    local_nonpersistent_flags+=("--set-file=")
     flags+=("--set-string=")
     local_nonpersistent_flags+=("--set-string=")
     flags+=("--strict")
@@ -1019,6 +1225,7 @@ _helm_lint()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1030,6 +1237,9 @@ _helm_lint()
 _helm_list()
 {
     last_command="helm_list"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1041,6 +1251,9 @@ _helm_list()
     flags+=("--all")
     flags+=("-a")
     local_nonpersistent_flags+=("--all")
+    flags+=("--chart-name")
+    flags+=("-c")
+    local_nonpersistent_flags+=("--chart-name")
     flags+=("--col-width=")
     local_nonpersistent_flags+=("--col-width=")
     flags+=("--date")
@@ -1062,6 +1275,8 @@ _helm_list()
     flags+=("--offset=")
     two_word_flags+=("-o")
     local_nonpersistent_flags+=("--offset=")
+    flags+=("--output=")
+    local_nonpersistent_flags+=("--output=")
     flags+=("--pending")
     local_nonpersistent_flags+=("--pending")
     flags+=("--reverse")
@@ -1076,6 +1291,8 @@ _helm_list()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -1084,6 +1301,7 @@ _helm_list()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1095,6 +1313,9 @@ _helm_list()
 _helm_package()
 {
     last_command="helm_package"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1125,6 +1346,7 @@ _helm_package()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1136,6 +1358,9 @@ _helm_package()
 _helm_plugin_install()
 {
     last_command="helm_plugin_install"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1150,6 +1375,7 @@ _helm_plugin_install()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1161,6 +1387,9 @@ _helm_plugin_install()
 _helm_plugin_list()
 {
     last_command="helm_plugin_list"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1173,6 +1402,7 @@ _helm_plugin_list()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1184,6 +1414,9 @@ _helm_plugin_list()
 _helm_plugin_remove()
 {
     last_command="helm_plugin_remove"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1196,6 +1429,7 @@ _helm_plugin_remove()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1207,6 +1441,9 @@ _helm_plugin_remove()
 _helm_plugin_update()
 {
     last_command="helm_plugin_update"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1219,6 +1456,7 @@ _helm_plugin_update()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1230,6 +1468,9 @@ _helm_plugin_update()
 _helm_plugin()
 {
     last_command="helm_plugin"
+
+    command_aliases=()
+
     commands=()
     commands+=("install")
     commands+=("list")
@@ -1246,6 +1487,7 @@ _helm_plugin()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1257,6 +1499,9 @@ _helm_plugin()
 _helm_repo_add()
 {
     last_command="helm_repo_add"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1281,6 +1526,7 @@ _helm_repo_add()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1292,6 +1538,9 @@ _helm_repo_add()
 _helm_repo_index()
 {
     last_command="helm_repo_index"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1308,6 +1557,7 @@ _helm_repo_index()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1319,6 +1569,9 @@ _helm_repo_index()
 _helm_repo_list()
 {
     last_command="helm_repo_list"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1331,6 +1584,7 @@ _helm_repo_list()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1342,6 +1596,9 @@ _helm_repo_list()
 _helm_repo_remove()
 {
     last_command="helm_repo_remove"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1354,6 +1611,7 @@ _helm_repo_remove()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1365,6 +1623,9 @@ _helm_repo_remove()
 _helm_repo_update()
 {
     last_command="helm_repo_update"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1373,10 +1634,13 @@ _helm_repo_update()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--strict")
+    local_nonpersistent_flags+=("--strict")
     flags+=("--debug")
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1388,12 +1652,23 @@ _helm_repo_update()
 _helm_repo()
 {
     last_command="helm_repo"
+
+    command_aliases=()
+
     commands=()
     commands+=("add")
     commands+=("index")
     commands+=("list")
     commands+=("remove")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("rm")
+        aliashash["rm"]="remove"
+    fi
     commands+=("update")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("up")
+        aliashash["up"]="update"
+    fi
 
     flags=()
     two_word_flags=()
@@ -1405,6 +1680,7 @@ _helm_repo()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1416,6 +1692,9 @@ _helm_repo()
 _helm_reset()
 {
     last_command="helm_reset"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1435,6 +1714,8 @@ _helm_reset()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -1443,6 +1724,7 @@ _helm_reset()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1454,6 +1736,9 @@ _helm_reset()
 _helm_rollback()
 {
     last_command="helm_rollback"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1462,6 +1747,10 @@ _helm_rollback()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--cleanup-on-fail")
+    local_nonpersistent_flags+=("--cleanup-on-fail")
+    flags+=("--description=")
+    local_nonpersistent_flags+=("--description=")
     flags+=("--dry-run")
     local_nonpersistent_flags+=("--dry-run")
     flags+=("--force")
@@ -1478,6 +1767,8 @@ _helm_rollback()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -1488,6 +1779,7 @@ _helm_rollback()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1499,6 +1791,9 @@ _helm_rollback()
 _helm_search()
 {
     last_command="helm_search"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1507,6 +1802,8 @@ _helm_search()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--col-width=")
+    local_nonpersistent_flags+=("--col-width=")
     flags+=("--regexp")
     flags+=("-r")
     local_nonpersistent_flags+=("--regexp")
@@ -1520,6 +1817,7 @@ _helm_search()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1531,6 +1829,9 @@ _helm_search()
 _helm_serve()
 {
     last_command="helm_serve"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1549,6 +1850,7 @@ _helm_serve()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1560,6 +1862,9 @@ _helm_serve()
 _helm_status()
 {
     last_command="helm_status"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1570,13 +1875,17 @@ _helm_status()
 
     flags+=("--output=")
     two_word_flags+=("-o")
+    local_nonpersistent_flags+=("--output=")
     flags+=("--revision=")
+    local_nonpersistent_flags+=("--revision=")
     flags+=("--tls")
     local_nonpersistent_flags+=("--tls")
     flags+=("--tls-ca-cert=")
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -1585,6 +1894,7 @@ _helm_status()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1596,6 +1906,9 @@ _helm_status()
 _helm_template()
 {
     last_command="helm_template"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1607,6 +1920,8 @@ _helm_template()
     flags+=("--execute=")
     two_word_flags+=("-x")
     local_nonpersistent_flags+=("--execute=")
+    flags+=("--is-upgrade")
+    local_nonpersistent_flags+=("--is-upgrade")
     flags+=("--kube-version=")
     local_nonpersistent_flags+=("--kube-version=")
     flags+=("--name=")
@@ -1622,6 +1937,8 @@ _helm_template()
     local_nonpersistent_flags+=("--output-dir=")
     flags+=("--set=")
     local_nonpersistent_flags+=("--set=")
+    flags+=("--set-file=")
+    local_nonpersistent_flags+=("--set-file=")
     flags+=("--set-string=")
     local_nonpersistent_flags+=("--set-string=")
     flags+=("--values=")
@@ -1631,6 +1948,7 @@ _helm_template()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1642,6 +1960,9 @@ _helm_template()
 _helm_test()
 {
     last_command="helm_test"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1652,6 +1973,8 @@ _helm_test()
 
     flags+=("--cleanup")
     local_nonpersistent_flags+=("--cleanup")
+    flags+=("--parallel")
+    local_nonpersistent_flags+=("--parallel")
     flags+=("--timeout=")
     local_nonpersistent_flags+=("--timeout=")
     flags+=("--tls")
@@ -1660,6 +1983,8 @@ _helm_test()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -1668,6 +1993,7 @@ _helm_test()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1679,6 +2005,9 @@ _helm_test()
 _helm_upgrade()
 {
     last_command="helm_upgrade"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1687,14 +2016,18 @@ _helm_upgrade()
     flags_with_completion=()
     flags_completion=()
 
+    flags+=("--atomic")
+    local_nonpersistent_flags+=("--atomic")
     flags+=("--ca-file=")
     local_nonpersistent_flags+=("--ca-file=")
     flags+=("--cert-file=")
     local_nonpersistent_flags+=("--cert-file=")
+    flags+=("--cleanup-on-fail")
+    local_nonpersistent_flags+=("--cleanup-on-fail")
+    flags+=("--description=")
+    local_nonpersistent_flags+=("--description=")
     flags+=("--devel")
     local_nonpersistent_flags+=("--devel")
-    flags+=("--disable-hooks")
-    local_nonpersistent_flags+=("--disable-hooks")
     flags+=("--dry-run")
     local_nonpersistent_flags+=("--dry-run")
     flags+=("--force")
@@ -1714,6 +2047,8 @@ _helm_upgrade()
     local_nonpersistent_flags+=("--password=")
     flags+=("--recreate-pods")
     local_nonpersistent_flags+=("--recreate-pods")
+    flags+=("--render-subchart-notes")
+    local_nonpersistent_flags+=("--render-subchart-notes")
     flags+=("--repo=")
     local_nonpersistent_flags+=("--repo=")
     flags+=("--reset-values")
@@ -1722,6 +2057,8 @@ _helm_upgrade()
     local_nonpersistent_flags+=("--reuse-values")
     flags+=("--set=")
     local_nonpersistent_flags+=("--set=")
+    flags+=("--set-file=")
+    local_nonpersistent_flags+=("--set-file=")
     flags+=("--set-string=")
     local_nonpersistent_flags+=("--set-string=")
     flags+=("--timeout=")
@@ -1732,6 +2069,8 @@ _helm_upgrade()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -1751,6 +2090,7 @@ _helm_upgrade()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1762,6 +2102,9 @@ _helm_upgrade()
 _helm_verify()
 {
     last_command="helm_verify"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1776,6 +2119,7 @@ _helm_verify()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1787,6 +2131,9 @@ _helm_verify()
 _helm_version()
 {
     last_command="helm_version"
+
+    command_aliases=()
+
     commands=()
 
     flags=()
@@ -1811,6 +2158,8 @@ _helm_version()
     local_nonpersistent_flags+=("--tls-ca-cert=")
     flags+=("--tls-cert=")
     local_nonpersistent_flags+=("--tls-cert=")
+    flags+=("--tls-hostname=")
+    local_nonpersistent_flags+=("--tls-hostname=")
     flags+=("--tls-key=")
     local_nonpersistent_flags+=("--tls-key=")
     flags+=("--tls-verify")
@@ -1819,6 +2168,7 @@ _helm_version()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1827,23 +2177,44 @@ _helm_version()
     noun_aliases=()
 }
 
-_helm()
+_helm_root_command()
 {
     last_command="helm"
+
+    command_aliases=()
+
     commands=()
     commands+=("completion")
     commands+=("create")
     commands+=("delete")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("del")
+        aliashash["del"]="delete"
+    fi
     commands+=("dependency")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("dep")
+        aliashash["dep"]="dependency"
+        command_aliases+=("dependencies")
+        aliashash["dependencies"]="dependency"
+    fi
     commands+=("fetch")
     commands+=("get")
     commands+=("history")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("hist")
+        aliashash["hist"]="history"
+    fi
     commands+=("home")
     commands+=("init")
     commands+=("inspect")
     commands+=("install")
     commands+=("lint")
     commands+=("list")
+    if [[ -z "${BASH_VERSION}" || "${BASH_VERSINFO[0]}" -gt 3 ]]; then
+        command_aliases+=("ls")
+        aliashash["ls"]="list"
+    fi
     commands+=("package")
     commands+=("plugin")
     commands+=("repo")
@@ -1868,6 +2239,7 @@ _helm()
     flags+=("--home=")
     flags+=("--host=")
     flags+=("--kube-context=")
+    flags+=("--kubeconfig=")
     flags+=("--tiller-connection-timeout=")
     flags+=("--tiller-namespace=")
 
@@ -1880,10 +2252,11 @@ __start_helm()
 {
     local cur prev words cword
     declare -A flaghash 2>/dev/null || :
+    declare -A aliashash 2>/dev/null || :
     if declare -F _init_completion >/dev/null 2>&1; then
         _init_completion -s || return
     else
-        __my_init_completion -n "=" || return
+        __helm_init_completion -n "=" || return
     fi
 
     local c=0
@@ -1898,7 +2271,7 @@ __start_helm()
     local last_command
     local nouns=()
 
-    __handle_word
+    __helm_handle_word
 }
 
 if [[ $(type -t compopt) = "builtin" ]]; then

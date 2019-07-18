@@ -98,8 +98,8 @@ __git ()
 #
 #   bash_completion - programmable completion functions for bash 3.2+
 #
-#   Copyright Â© 2006-2008, Ian Macdonald <ian@caliban.org>
-#             Â© 2009-2010, Bash Completion Maintainers
+#   Copyright © 2006-2008, Ian Macdonald <ian@caliban.org>
+#             © 2009-2010, Bash Completion Maintainers
 #                     <bash-completion-devel@lists.alioth.debian.org>
 #
 #   This program is free software; you can redistribute it and/or modify
