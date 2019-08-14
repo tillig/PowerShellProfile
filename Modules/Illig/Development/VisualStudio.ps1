@@ -24,8 +24,9 @@ function Invoke-VisualStudioDevPrompt {
             if ($NULL -eq $env:VSPREFERRED -or (-not $fallbackReleases.Contains($env:VSPREFERRED))) {
                 $vs = Select-VsInstall -Year "$($env:VSPREFERRED)"
                 if ($NULL -ne $vs) {
-                    Write-Verbose "Attempting VS load..."
-                    Invoke-BatchFile -Path "$($vs.InstallationPath)\Common7\Tools\VsDevCmd.bat"
+                    $batPath = "$($vs.InstallationPath)\Common7\Tools\VsDevCmd.bat"
+                    Write-Verbose "Attempting VS load from $batPath..."
+                    Invoke-BatchFile -Path "$batPath"
                     $vsYear = $vs.DisplayName -replace '.*\s+(\d\d\d\d).*', '${1}'
                     $global:PromptEnvironment = " ⌂ vs$vsYear "
                     return
