@@ -11,6 +11,10 @@ $Env:PYTHONIOENCODING = "UTF-8"
 Test-AnsiSupport | Out-Null
 
 # Import VS environment
+# As of VS 2019 16.2 there's a PowerShell module for developer VS prompt.
+# However, it is NOT compatible with PowerShell Core.
+# Instance ID can be found when locating the VS install information.
+# C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe -NoExit -Command "& { Import-Module .\Common7\Tools\vsdevshell\Microsoft.VisualStudio.DevShell.dll; Enter-VsDevShell -InstanceId 5a7ac072}"
 Invoke-VisualStudioDevPrompt
 
 # Aliases
