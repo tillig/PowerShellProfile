@@ -1,1 +1,6 @@
 root = true
+
+[*.{ps1,psd1,psm1}]
+charset = utf-8-bom
+trim_trailing_whitespace = true
+insert_final_newline = true
