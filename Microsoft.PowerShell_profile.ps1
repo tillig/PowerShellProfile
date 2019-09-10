@@ -41,7 +41,11 @@ $global:GitPromptSettings.WorkingColor.ForegroundColor = [ConsoleColor]::Yellow
 # Prompt shape
 $global:GitPromptSettings.AfterStatus.Text = " "
 $global:GitPromptSettings.BeforeStatus.Text = "  "
+$global:GitPromptSettings.BranchAheadStatusSymbol.Text = "↑"
+$global:GitPromptSettings.BranchBehindStatusSymbol.Text = "↓"
+$global:GitPromptSettings.BranchBehindAndAheadStatusSymbol.Text = "↕"
 $global:GitPromptSettings.BranchIdenticalStatusSymbol.Text = ""
+$global:GitPromptSettings.BranchGoneStatusSymbol.Text = "␥"
 $global:GitPromptSettings.BranchUntrackedText = "◇ "
 $global:GitPromptSettings.DelimStatus.Text = " ║"
 $global:GitPromptSettings.LocalStagedStatusSymbol.Text = ""
@@ -151,7 +155,7 @@ Set-Content Function:prompt {
 
   if ($scriptReturnValues["kubectl"] -ne $null) {
     Write-Host " " -NoNewLine
-    Write-Host " ▣" -NoNewLine -BackgroundColor DarkCyan -ForegroundColor Green
+    Write-Host " ⎈ " -NoNewLine -BackgroundColor DarkCyan -ForegroundColor Green
     Write-Host " $($scriptReturnValues['kubectl']) " -NoNewLine -BackgroundColor DarkCyan -ForegroundColor White
   }
 

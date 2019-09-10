@@ -7,3 +7,5 @@ The profile assumes certain modules are installed. You can see those listed at t
 I generally have this checked right in `C:\Users\tillig\Documents\WindowsPowerShell` so it becomes the profile. Makes it easy to push changes up when needed. For PowerShell Core it should be `C:\Users\tillig\Documents\PowerShell` - a symbolic link between the two directories can help if both original and PowerShell Core are installed.
 
 I don't really use the PowerShell ISE so that one is likely not up to date. I use other editors like VS Code for my scripting; or I'll use the PS prompt.
+
+I use the [Fira Code font which includes glyphs](https://github.com/tonsky/FiraCode) so if you see things not rendering right, that's why. Also, plain Windows Powershell running under the old school Windows console doesn't really work well with glyphs. Consider Windows Terminal and/or PowerShell Core.
