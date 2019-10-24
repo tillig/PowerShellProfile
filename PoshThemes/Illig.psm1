@@ -165,9 +165,16 @@ function Write-Theme {
     # Writes the postfix to the prompt
     $prompt += Write-Prompt -Object $sl.PromptSymbols.SegmentForwardSymbol -ForegroundColor $lastColor
 
+    # Fix the issue where a line wrap at the end of the prompt causes the next
+    # line to be colored in.
+    $cleanPrompt = $prompt -replace '(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]',''
+    $toClear = $host.UI.RawUI.BufferSize.Width - ($cleanPrompt.Length % $host.UI.RawUI.BufferSize.Width)
+    if ($toClear -ne $host.UI.RawUI.BufferSize.Width) {
+        $prompt += Write-Prompt -Object (" " * $toClear) -ForegroundColor $host.UI.RawUI.ForegroundColor -BackgroundColor $host.UI.RawUI.BackgroundColor
+    }
+
     $timeStamp = Get-Date -UFormat %R
     $timestamp = "[$timeStamp]"
-
     $prompt += Set-CursorForRightBlockWrite -textLength ($timestamp.Length + 1)
     $prompt += Write-Prompt $timeStamp -ForegroundColor $sl.Colors.PromptForegroundColor
 
