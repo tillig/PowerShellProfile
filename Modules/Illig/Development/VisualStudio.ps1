@@ -28,7 +28,7 @@ function Invoke-VisualStudioDevPrompt {
                     Write-Verbose "Attempting VS load from $batPath..."
                     Invoke-BatchFile -Path "$batPath"
                     $vsYear = $vs.DisplayName -replace '.*\s+(\d\d\d\d).*', '${1}'
-                    $global:PromptEnvironment = " ⌂ vs$vsYear "
+                    $global:PromptEnvironment = " $([char]::ConvertFromUtf32(0x2302)) vs$vsYear " # 2302 = House
                     return
                 }
             }

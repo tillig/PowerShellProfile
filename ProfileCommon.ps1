@@ -1,7 +1,8 @@
 Import-Module PSReadline
 Import-Module Microsoft.PowerShell.Archive
-Import-Module Pscx -NoClobber
 Import-Module posh-git
+Import-Module oh-my-posh
+Import-Module Pscx -NoClobber
 Import-Module VSSetup
 Import-Module Illig
 
