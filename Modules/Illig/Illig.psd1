@@ -28,6 +28,7 @@
         'Reset-Source',
         'Select-VsInstall',
         'Set-ConsoleEncoding',
+        'Set-DotEnv',
         'Test-AnsiSupport'
     )
 
