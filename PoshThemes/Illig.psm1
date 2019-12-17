@@ -229,8 +229,8 @@ $sl.Colors.PromptHighlightColor = [ConsoleColor]::DarkBlue
 $sl.Colors.GitForegroundColor = [ConsoleColor]::Black
 $sl.Colors.WithForegroundColor = [ConsoleColor]::DarkRed
 $sl.Colors.WithBackgroundColor = [ConsoleColor]::Magenta
-$sl.Colors.VirtualEnvBackgroundColor = [System.ConsoleColor]::Red
-$sl.Colors.VirtualEnvForegroundColor = [System.ConsoleColor]::White
+$sl.Colors.VirtualEnvBackgroundColor = [ConsoleColor]::Red
+$sl.Colors.VirtualEnvForegroundColor = [ConsoleColor]::White
 
 # Custom symbols
 $sl.PromptSymbols.KubectlSymbol = [char]::ConvertFromUtf32(0x2388) # Helm symbol
@@ -240,16 +240,16 @@ $sl.PromptSymbols.DotNetSymbol = [char]::ConvertFromUtf32(0x25C9) # Fisheye
 # Custom colors
 $sl.Colors.AdminPromptSymbolColor = [ConsoleColor]::Red
 $sl.Colors.PromptEnvForegroundColor = [ConsoleColor]::White
-$sl.Colors.PromptEnvBackgroundColor = [System.Drawing.Color]::DarkGray
+$sl.Colors.PromptEnvBackgroundColor = [ConsoleColor]::DarkGray
 $sl.Colors.DotNetSymbolColor = [ConsoleColor]::DarkBlue
-$sl.Colors.DotNetForegroundColor = [ConsoleColor]::Black
-$sl.Colors.DotNetBackgroundColor = [System.Drawing.Color]::Gray
+$sl.Colors.DotNetForegroundColor = [ConsoleColor]::DarkBlue
+$sl.Colors.DotNetBackgroundColor = [ConsoleColor]::Cyan
 $sl.Colors.KubectlSymbolColor = [ConsoleColor]::Black
-$sl.Colors.KubectlForegroundColor = [ConsoleColor]::White
-$sl.Colors.KubectlBackgroundColor = [System.Drawing.Color]::DarkCyan
+$sl.Colors.KubectlForegroundColor = [ConsoleColor]::Black
+$sl.Colors.KubectlBackgroundColor = [ConsoleColor]::DarkYellow
 $sl.Colors.AzureSymbolColor = [ConsoleColor]::Black
 $sl.Colors.AzureForegroundColor = [ConsoleColor]::White
-$sl.Colors.AzureBackgroundColor = [System.Drawing.Color]::CadetBlue
+$sl.Colors.AzureBackgroundColor = [ConsoleColor]::DarkCyan
 
 ###
 # Custom prompt adapted from Brad Wilson
