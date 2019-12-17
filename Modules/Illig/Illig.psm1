@@ -1,4 +1,5 @@
-﻿. $PSScriptRoot\Development\New-MachineKey.ps1
+﻿. $PSScriptRoot\Development\Invoke-WindowsBatchFile.ps1
+. $PSScriptRoot\Development\New-MachineKey.ps1
 . $PSScriptRoot\Development\Remove-TempFiles.ps1
 . $PSScriptRoot\Development\Reset-Source.ps1
 . $PSScriptRoot\Development\Set-DotEnv.ps1
@@ -13,6 +14,7 @@ $exportModuleMemberParams = @{
         'Get-KubectlAll',
         'Get-KubectlShell',
         'Invoke-VisualStudioDevPrompt',
+        'Invoke-WindowsBatchFile',
         'New-MachineKey',
         'Remove-TempFiles',
         'Reset-Source',

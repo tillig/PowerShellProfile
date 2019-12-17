@@ -23,6 +23,7 @@
         'Get-KubectlAll',
         'Get-KubectlShell',
         'Invoke-VisualStudioDevPrompt',
+        'Invoke-WindowsBatchFile',
         'New-MachineKey',
         'Remove-TempFiles',
         'Reset-Source',
