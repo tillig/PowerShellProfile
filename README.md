@@ -2,10 +2,43 @@
 
 This repo hosts my PowerShell profile. It's yours to investigate and steal bits and pieces from, though I'm not going to accept issues or PRs on it. It's not intended for copy/paste magic instant reuse. There is no warranty, expressed or implied. It may or may not work on all versions of Windows. It may or may not work in PowerShell Core on any given day. It may be totally broken. It may not be super thoroughly documented. Don't worry about it, it's my profile, not yours.
 
-The profile assumes certain modules are installed. You can see those listed at the top of the `ProfileCommon.ps1` file. There is not an installer for them, but they all come out of the [PowerShell Gallery](https://www.powershellgallery.com) so it shouldn't be hard to get them.
+**Setup instructions are mostly for me.** Yeah, selfish like that. It helps me remember what I need to do to hook this thing up to whatever machine I'm on. You can use them, too, if you want.
 
-I generally have this checked right in `C:\Users\tillig\Documents\WindowsPowerShell` so it becomes the profile. Makes it easy to push changes up when needed. For PowerShell Core it should be `C:\Users\tillig\Documents\PowerShell` - a symbolic link between the two directories can help if both original and PowerShell Core are installed.
+Do the OS-specific setup, then do the common setup. The OS-specific stuff gets things checked out and symlinked as needed. That has to happen before additional modules get installed or it doesn't work.
 
-I don't really use the PowerShell ISE so that one is likely not up to date. I use other editors like VS Code for my scripting; or I'll use the PS prompt.
+## Setup: Windows
+
+- Check out to `C:\Users\tillig\Documents\WindowsPowerShell` so it becomes the profile for Windows PowerShell.
+- Create symbolic link from that `WindowsPowerShell` folder to `C:\Users\tillig\Documents\PowerShell` so it also is the profile for Powershell Core.
+
+## Setup: MacOS
+
+The `sed` that ships with MacOS sucks. `sed` is used in the PowerShell profile to parse Azure subscription .ini info. Use Homebrew to install the GNU `sed`. Then you need to add the GNU `sed` to your path before the Apple `sed`. Homebrew will tell you how after install.
+
+```powershell
+brew install gnu-sed
+```
+
+MacOS only has PowerShell Core and profiles are all over the place for MacOS PowerShell Core. It expects:
+
+- Profile at `~/.config/powershell/`
+- Modules at `~/.local/share/powershell/Modules`
+
+That makes for some extra symlinking. Let's say the profile is checked out at `/Users/tillig/dev/tillig/PowerShellProfile` (where `~` is `/Users/tillig`).
+
+- Make the per-user modules folder be the Modules folder from the profile.
+  `ln -s /Users/tillig/dev/tillig/PowerShellProfile/Modules /Users/tillig/.local/share/powershell/Modules`
+- Make the user profile be the checked-out profile.
+  `ln -s /Users/tillig/dev/tillig/PowerShellProfile /Users/tillig/.config/powershell`
+
+## Setup: Common (Post Checkout)
+
+There are some modules required for installation. I don't check them in; you can install them with the `Install-ProfileModules.ps1` script from the [PowerShell Gallery](https://www.powershellgallery.com). They are consumed from `ProfileCommon.ps1`.
+
+If you've never installed modules from the gallery, you'll need to enable trust.
+
+```powershell
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+```
 
 I use the [Fira Code font which includes glyphs](https://github.com/tonsky/FiraCode) so if you see things not rendering right, that's why. Also, plain Windows Powershell running under the old school Windows console doesn't really work well with glyphs. Consider Windows Terminal and/or PowerShell Core.

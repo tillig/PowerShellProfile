@@ -42,5 +42,5 @@
     AliasesToExport   = @()
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules = @('Pscx', 'VSSetup')
+    RequiredModules = @('VSSetup')
 }

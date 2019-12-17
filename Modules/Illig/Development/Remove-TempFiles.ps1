@@ -13,6 +13,10 @@ function Remove-TempFiles {
     )
 
     Begin {
+        if (-not ($isDesktop -or $IsWindows)) {
+            throw "This command is only supported for Windows."
+        }
+
         $tempFolders = @(
             $env:TEMP,
             "$($env:LOCALAPPDATA)\Temp",

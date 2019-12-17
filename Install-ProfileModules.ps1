@@ -3,7 +3,6 @@ $releaseModules = (
     "Microsoft.PowerShell.Archive",
     "posh-git",
     "oh-my-posh",
-    "Pscx",
     "PSBashCompletions",
     "VSSetup"
 )

@@ -27,6 +27,9 @@ function Write-Theme {
         $currentContext = $null
         if ($null -ne (Get-Command "kubectl" -ErrorAction Ignore)) {
             $currentContext = (& kubectl config current-context 2> $null)
+            if($null -eq $currentContext) {
+                $currentContext = "[none]"
+            }
         }
         return $currentContext
     }
@@ -43,6 +46,9 @@ function Write-Theme {
             $currentSub = & sed -nr "/^\[AzureCloud\]/ { :l /^subscription[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" "$($cloudConfigPath.Path)"
             if ($null -ne $currentSub) {
                 $currentAccount = (Get-Content ~/.azure/azureProfile.json | ConvertFrom-Json).subscriptions | Where-Object { $_.id -eq $currentSub } | Select-Object -ExpandProperty Name
+            }
+            if ($null -eq $currentAccount) {
+                $currentAccount = "[none]"
             }
         }
         return $currentAccount
