@@ -4,7 +4,8 @@ $releaseModules = (
     "posh-git",
     "oh-my-posh",
     "PSBashCompletions",
-    "VSSetup"
+    "VSSetup",
+    "ClipboardText"
 )
 
 # Settings for posh-git require v1.0.0 minimum, in pre-release
