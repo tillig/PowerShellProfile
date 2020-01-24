@@ -18,6 +18,9 @@ function Write-Theme {
         $dotnetVersion = $null
         if ($null -ne (Get-Command "dotnet" -ErrorAction Ignore)) {
             $dotnetVersion = (& dotnet --version 2> $null)
+            if ($LASTEXITCODE -eq 145) {
+                $dotnetVersion = "[unsupported global.json]"
+            }
         }
         return $dotnetVersion
     }
