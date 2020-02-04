@@ -23,6 +23,13 @@ If (($isDesktop -or $IsWindows)) {
 # Aliases
 Set-Alias -Name which -Value Get-Command
 
+# MacOS/dotnet fix - some dotnet global commands require DOTNET_HOST_PATH but
+# that doesn't always get set by the dotnet CLI.
+$dotnetLocation = Get-Command "dotnet" -ErrorAction Ignore
+if ($null -ne $dotnetLocation) {
+    [System.Environment]::SetEnvironmentVariable("DOTNET_HOST_PATH", $dotnetLocation.Source)
+}
+
 # Chocolatey profile
 if ($isDesktop -or $IsWindows) {
     $ChocolateyProfile = "$env:ChocolateyInstall/helpers/chocolateyProfile.psm1"
