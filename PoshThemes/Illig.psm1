@@ -218,7 +218,7 @@ function Write-Theme {
     $prompt
 }
 
-$sl = $global:ThemeSettings #local settings
+$sl = $global:ThemeSettings # local settings
 $sl.PromptSymbols.StartSymbol = ''
 $sl.PromptSymbols.ElevatedSymbol = [char]::ConvertFromUtf32(0x2620) # Skull and crossbones
 $sl.PromptSymbols.PromptIndicator = '>' # Was [char]::ConvertFromUtf32(0xE0B1) Hollow angle arrow right
@@ -236,9 +236,9 @@ $sl.Colors.VirtualEnvBackgroundColor = [ConsoleColor]::Red
 $sl.Colors.VirtualEnvForegroundColor = [ConsoleColor]::White
 
 # Custom symbols
-$sl.PromptSymbols.KubectlSymbol = [char]::ConvertFromUtf32(0x2388) # Helm symbol
-$sl.PromptSymbols.AzureSymbol = [char]::ConvertFromUtf32(0x263C) # White sun with rays
-$sl.PromptSymbols.DotNetSymbol = [char]::ConvertFromUtf32(0x25C9) # Fisheye
+$sl.PromptSymbols.KubectlSymbol = [char]::ConvertFromUtf32(0x2388) # ⎈ Helm symbol
+$sl.PromptSymbols.AzureSymbol = [char]::ConvertFromUtf32(0xFD03) # ﴃ Azure logo
+$sl.PromptSymbols.DotNetSymbol = [char]::ConvertFromUtf32(0xE77F) #  .NET logo
 
 # Custom colors
 $sl.Colors.AdminPromptSymbolColor = [ConsoleColor]::Red

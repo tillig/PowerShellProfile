@@ -41,4 +41,4 @@ If you've never installed modules from the gallery, you'll need to enable trust.
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 ```
 
-I use the [Fira Code font which includes glyphs](https://github.com/tonsky/FiraCode) so if you see things not rendering right, that's why. Also, plain Windows Powershell running under the old school Windows console doesn't really work well with glyphs. Consider Windows Terminal and/or PowerShell Core.
+I use the [Fira Code Nerd Font which includes glyphs and logos](https://github.com/ryanoasis/nerd-fonts) so if you see things not rendering right, that's why. Plain Windows Powershell running under the old school Windows console requires the Mono version of the font because it doesn't work well with glyphs. Consider Windows Terminal and/or PowerShell Core - on Windows those both support multi-character width glyphs.
