@@ -6,11 +6,13 @@
 . $PSScriptRoot\Development\VisualStudio.ps1
 . $PSScriptRoot\Kubernetes\Get-KubectlAll.ps1
 . $PSScriptRoot\Kubernetes\Get-KubectlShell.ps1
+. $PSScriptRoot\Terminal\AliasFunctions.ps1
 . $PSScriptRoot\Terminal\Set-ConsoleEncoding.ps1
 . $PSScriptRoot\Terminal\Test-AnsiSupport.ps1
 
 $exportModuleMemberParams = @{
     Function = @(
+        'AliasFunctionDir',
         'Get-KubectlAll',
         'Get-KubectlShell',
         'Invoke-VisualStudioDevPrompt',

@@ -20,6 +20,7 @@
 
     # Functions to export from this module
     FunctionsToExport = @(
+        'AliasFunctionDir',
         'Get-KubectlAll',
         'Get-KubectlShell',
         'Invoke-VisualStudioDevPrompt',
