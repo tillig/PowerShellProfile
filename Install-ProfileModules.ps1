@@ -1,7 +1,6 @@
 $releaseModules = (
     "PSReadline",
     "Microsoft.PowerShell.Archive",
-    "posh-git",
     "oh-my-posh",
     "PSBashCompletions",
     "VSSetup",
