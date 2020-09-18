@@ -1,3 +1,4 @@
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 $releaseModules = (
     "PSReadline",
     "Microsoft.PowerShell.Archive",
@@ -13,10 +14,12 @@ $preReleaseModules = (
     "posh-git"
 )
 
+Write-Host "Installing release modules - watch for warnings, you may need to install a module and include -Force to get side-by-side support."
 $releaseModules | ForEach-Object {
     Install-Module $_ -Scope CurrentUser -AllowClobber
 }
 
+Write-Host "Installing prerelease modules - watch for warnings, you may need to install a module and include -Force to get side-by-side support."
 $preReleaseModules | ForEach-Object {
     Install-Module $_ -Scope CurrentUser -AllowClobber -AllowPrerelease
 }
