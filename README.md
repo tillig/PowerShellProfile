@@ -10,10 +10,16 @@ Do the OS-specific setup, then do the common setup. The OS-specific stuff gets t
 
 - Check out to `C:\Users\tillig\Documents\WindowsPowerShell` so it becomes the profile for Windows PowerShell.
 - Create symbolic link from that `WindowsPowerShell` folder to `C:\Users\tillig\Documents\PowerShell` so it also is the profile for Powershell Core.
+- Create a DWORD key at `HKEY_CURRENT_USER\Console\VirtualTerminalLevel` with the value `1` to enable ANSI colors in terminal.
+
+```cmd
+REG ADD HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1
+REG QUERY HKCU\Console /v VirtualTerminalLevel
+```
 
 ## Setup: MacOS
 
-The `sed` that ships with MacOS sucks. `sed` is used in the PowerShell profile to parse Azure subscription .ini info. Use Homebrew to install the GNU `sed`. Then you need to add the GNU `sed` to your path before the Apple `sed`. Homebrew will tell you how after install.
+The `sed` that ships with MacOS sucks. `sed` is used in the PowerShell profile to parse Azure subscription .ini info. Use Homebrew to install the GNU `sed`. Then you need to add the GNU `sed` to your path (e.g., update `/etc/paths`) _before_ the Apple `sed`. Homebrew will tell you how after install.
 
 ```powershell
 brew install gnu-sed
