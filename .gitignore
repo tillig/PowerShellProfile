@@ -3,6 +3,7 @@ ISE/**
 Modules/**
 Reference/**
 Scripts/**
+.DS_Store
 
 !Modules/Illig
 !Modules/Illig/**

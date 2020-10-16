@@ -1,0 +1,167 @@
+{
+  "blocks": [
+    {
+      "alignment": "left",
+      "segments": [
+        {
+          "foreground": "#ff8080",
+          "invert_powerline": false,
+          "leading_diamond": "",
+          "powerline_symbol": "",
+          "properties": {
+            "always_enabled": false,
+            "display_exit_code": true,
+            "error_color": "#e91e63",
+            "postfix": "]",
+            "prefix": "[⌧ EXIT"
+          },
+          "style": "powerline",
+          "trailing_diamond": "",
+          "type": "exit"
+        },
+        {
+          "background": "#ffe9aa",
+          "foreground": "#100e23",
+          "invert_powerline": false,
+          "leading_diamond": "",
+          "powerline_symbol": "",
+          "properties": {
+            "root_icon": "☠"
+          },
+          "style": "powerline",
+          "trailing_diamond": "",
+          "type": "root"
+        },
+        {
+          "background": "#000000",
+          "foreground": "#ffffff",
+          "invert_powerline": false,
+          "leading_diamond": "",
+          "powerline_symbol": "",
+          "properties": {
+            "postfix": " ",
+            "user_info_separator": "@"
+          },
+          "style": "powerline",
+          "trailing_diamond": "",
+          "type": "session"
+        },
+        {
+          "background": "#0000c0",
+          "foreground": "#ffffff",
+          "invert_powerline": false,
+          "leading_diamond": "",
+          "powerline_symbol": "",
+          "properties": {
+            "prefix": "  ",
+            "style": "short"
+          },
+          "style": "powerline",
+          "trailing_diamond": "",
+          "type": "path"
+        },
+        {
+          "background": "#00ffff",
+          "foreground": "#000000",
+          "invert_powerline": false,
+          "leading_diamond": "",
+          "powerline_symbol": "",
+          "properties": {
+            "prefix": "  "
+          },
+          "style": "powerline",
+          "type": "dotnet"
+        },
+        {
+          "background": "#ebcc34",
+          "foreground": "#000000",
+          "invert_powerline": false,
+          "leading_diamond": "",
+          "powerline_symbol": "",
+          "properties": {
+            "prefix": " ⎈ "
+          },
+          "style": "powerline",
+          "type": "kubectl"
+        },
+        {
+          "background": "#3493eb",
+          "foreground": "#000000",
+          "invert_powerline": false,
+          "leading_diamond": "",
+          "powerline_symbol": "",
+          "properties": {
+            "prefix": " ﴃ "
+          },
+          "style": "powerline",
+          "type": "az"
+        },
+        {
+          "background": "#00cc00",
+          "foreground": "#000000",
+          "powerline_symbol": "",
+          "properties": {
+            "bitbucket_icon": "",
+            "branch_ahead_icon": "↑",
+            "branch_behind_icon": "↓",
+            "branch_icon": "",
+            "branch_identical_icon": "≡",
+            "cherry_pick_icon": " ",
+            "commit_icon": " ",
+            "display_stash_count": true,
+            "display_upstream_icon": true,
+            "git_icon": "",
+            "github_icon": "",
+            "gitlab_icon": "",
+            "local_staged_icon": "",
+            "local_working_icon": "",
+            "merge_icon": " ",
+            "rebase_icon": " ",
+            "stash_count_icon": " ",
+            "tag_icon": "笠 "
+          },
+          "style": "powerline",
+          "type": "git"
+        }
+      ],
+      "type": "prompt",
+      "vertical_offset": 0
+    },
+    {
+      "alignment": "right",
+      "segments": [
+        {
+          "foreground": "#ffffff",
+          "properties": {
+            "postfix": "]",
+            "prefix": "[",
+            "time_format": "15:04"
+          },
+          "style": "plain",
+          "type": "time"
+        }
+      ],
+      "type": "prompt",
+      "vertical_offset": 0
+    },
+    {
+      "type": "newline"
+    },
+    {
+      "alignment": "left",
+      "segments": [
+        {
+          "properties": {
+            "postfix": ">"
+          },
+          "style": "plain",
+          "type": "shell"
+        }
+      ],
+      "type": "prompt",
+      "vertical_offset": 0
+    }
+  ],
+  "console_title": false,
+  "final_space": true
+}

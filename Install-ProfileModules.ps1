@@ -2,7 +2,6 @@ Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 $releaseModules = (
     "PSReadline",
     "Microsoft.PowerShell.Archive",
-    "oh-my-posh",
     "PSBashCompletions",
     "VSSetup",
     "ClipboardText"
@@ -11,6 +10,7 @@ $releaseModules = (
 # Settings for posh-git require v1.0.0 minimum, in pre-release
 # since 1/10/2018.
 $preReleaseModules = (
+    "oh-my-posh",
     "posh-git"
 )
 
