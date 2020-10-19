@@ -13,7 +13,7 @@
             "display_exit_code": true,
             "error_color": "#e91e63",
             "postfix": "]",
-            "prefix": "[⌧ EXIT"
+            "prefix": "[⌧ "
           },
           "style": "powerline",
           "trailing_diamond": "",
