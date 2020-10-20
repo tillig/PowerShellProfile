@@ -5,9 +5,7 @@
       "segments": [
         {
           "foreground": "#ff8080",
-          "invert_powerline": false,
-          "leading_diamond": "",
-          "powerline_symbol": "",
+          "powerline_symbol": "\uE0B0",
           "properties": {
             "always_enabled": false,
             "display_exit_code": true,
@@ -16,56 +14,55 @@
             "prefix": "[⌧ "
           },
           "style": "powerline",
-          "trailing_diamond": "",
           "type": "exit"
         },
         {
           "background": "#ffe9aa",
           "foreground": "#100e23",
-          "invert_powerline": false,
-          "leading_diamond": "",
-          "powerline_symbol": "",
+          "powerline_symbol": "\uE0B0",
           "properties": {
             "root_icon": "☠"
           },
           "style": "powerline",
-          "trailing_diamond": "",
           "type": "root"
         },
         {
-          "background": "#000000",
+          "background": "#1f1f1f",
           "foreground": "#ffffff",
-          "invert_powerline": false,
-          "leading_diamond": "",
-          "powerline_symbol": "",
+          "powerline_symbol": "\uE0B0",
           "properties": {
             "postfix": " ",
             "user_info_separator": "@"
           },
           "style": "powerline",
-          "trailing_diamond": "",
           "type": "session"
         },
         {
           "background": "#0000c0",
           "foreground": "#ffffff",
-          "invert_powerline": false,
-          "leading_diamond": "",
-          "powerline_symbol": "",
+          "powerline_symbol": "\uE0B0",
           "properties": {
             "prefix": "  ",
             "style": "short"
           },
           "style": "powerline",
-          "trailing_diamond": "",
           "type": "path"
+        },
+        {
+          "background": "#0077c2",
+          "foreground": "#ffffff",
+          "powerline_symbol": "\uE0B0",
+          "properties": {
+            "prefix": "\uE705 ",
+            "var_name": "LOCATION_STACK_DEPTH"
+          },
+          "style": "powerline",
+          "type": "envvar"
         },
         {
           "background": "#00ffff",
           "foreground": "#000000",
-          "invert_powerline": false,
-          "leading_diamond": "",
-          "powerline_symbol": "",
+          "powerline_symbol": "\uE0B0",
           "properties": {
             "prefix": "  "
           },
@@ -75,9 +72,7 @@
         {
           "background": "#ebcc34",
           "foreground": "#000000",
-          "invert_powerline": false,
-          "leading_diamond": "",
-          "powerline_symbol": "",
+          "powerline_symbol": "\uE0B0",
           "properties": {
             "prefix": " ⎈ "
           },
@@ -87,9 +82,7 @@
         {
           "background": "#3493eb",
           "foreground": "#000000",
-          "invert_powerline": false,
-          "leading_diamond": "",
-          "powerline_symbol": "",
+          "powerline_symbol": "\uE0B0",
           "properties": {
             "prefix": " ﴃ "
           },
@@ -99,26 +92,10 @@
         {
           "background": "#00cc00",
           "foreground": "#000000",
-          "powerline_symbol": "",
+          "powerline_symbol": "\uE0B0",
           "properties": {
-            "bitbucket_icon": "",
-            "branch_ahead_icon": "↑",
-            "branch_behind_icon": "↓",
-            "branch_icon": "",
-            "branch_identical_icon": "≡",
-            "cherry_pick_icon": " ",
-            "commit_icon": " ",
             "display_stash_count": true,
-            "display_upstream_icon": true,
-            "git_icon": "",
-            "github_icon": "",
-            "gitlab_icon": "",
-            "local_staged_icon": "",
-            "local_working_icon": "",
-            "merge_icon": " ",
-            "rebase_icon": " ",
-            "stash_count_icon": " ",
-            "tag_icon": "笠 "
+            "display_upstream_icon": true
           },
           "style": "powerline",
           "type": "git"
