@@ -64,6 +64,7 @@
           "foreground": "#000000",
           "powerline_symbol": "\uE0B0",
           "properties": {
+            "display_mode": "always",
             "prefix": "  "
           },
           "style": "powerline",
