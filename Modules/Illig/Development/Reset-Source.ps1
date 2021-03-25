@@ -14,12 +14,12 @@ function Reset-Source {
         [System.IO.DirectoryInfo[]] $Source
     )
     Begin {
-        Get-Command nuget -ErrorAction Ignore | Out-Null
+        Get-Command dotnet -ErrorAction Ignore | Out-Null
         if ($?) {
-            & nuget locals -clear all
+            & dotnet nuget locals -clear all
         }
         else {
-            Write-Warning 'NuGet not found on path. Unable to clear NuGet cache.'
+            Write-Warning 'dotnet CLI not found on path. Unable to clear NuGet cache.'
         }
         Get-Command git -ErrorAction Ignore | Out-Null
         if (-not $?) {
