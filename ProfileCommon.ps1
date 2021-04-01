@@ -1,9 +1,8 @@
-Import-Module PSReadline
-Import-Module Microsoft.PowerShell.Archive
-Import-Module posh-git
 Import-Module oh-my-posh
 Import-Module VSSetup
 Import-Module ClipboardText
+Import-Module PSScriptAnalyzer
+Import-Module Pester
 Import-Module Illig
 
 # Windows defaults to ASCII; set UTF-8 and verify ANSI color support.

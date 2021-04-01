@@ -1,12 +1,11 @@
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 $releaseModules = @(
-    "PSReadline",
-    "Microsoft.PowerShell.Archive",
     "PSBashCompletions",
     "VSSetup",
     "ClipboardText",
     "oh-my-posh",
-    "PSScriptAnalyzer"
+    "PSScriptAnalyzer",
+    "Pester"
 )
 
 $preReleaseModules = @(
