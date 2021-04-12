@@ -41,7 +41,7 @@ function Remove-GitLocalOnly {
                 exit 1
             }
 
-            $LocalOnlyBranches = $ToParse | ConvertFrom-Json -NoEnumerate | Where-Object { ($_.Remote.Length -eq 0) -or ($_.Track -eq "gone") } | Select-Object -ExpandProperty Name
+            $LocalOnlyBranches = $ToParse | ConvertFrom-Json | Where-Object { ($_.Remote.Length -eq 0) -or ($_.Track -eq "gone") } | Select-Object -ExpandProperty Name
             $LocalOnlyBranches | ForEach-Object {
                 $LocalBranch = $_
                 if ($pscmdlet.ShouldProcess("$LocalBranch", "Remove branch with no upstream")) {
