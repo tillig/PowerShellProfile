@@ -20,7 +20,13 @@ function Remove-GitLocalOnly {
         [ValidateNotNullOrEmpty()]
         $Path = $PWD
     )
-
+    Begin {
+        $git = Get-Command git -ErrorAction Ignore
+        if ($Null -eq $git) {
+            Write-Error "Unable to locate git."
+            Exit 1
+        }
+    }
     Process {
         If (-not (Test-Path $Path)) {
             throw "Unable to find path $Path"
@@ -30,11 +36,20 @@ function Remove-GitLocalOnly {
             $ToParse = "["
             $ToParse += (&git branch --format "{\`"Name\`":\`"%(refname:short)\`",\`"Remote\`":\`"%(upstream)\`",\`"Track\`":\`"%(upstream:track,nobracket)\`"}") -Join ","
             $ToParse += "]"
-            $LocalOnlyBranches = $ToParse | ConvertFrom-Json | Where-Object { ($_.Remote.Length -eq 0) -or ($_.Track -eq "gone") } | Select-Object -ExpandProperty Name
+            If ($LASTEXITCODE -ne 0) {
+                throw "Unable to retrieve branches."
+                exit 1
+            }
+
+            $LocalOnlyBranches = $ToParse | ConvertFrom-Json -NoEnumerate | Where-Object { ($_.Remote.Length -eq 0) -or ($_.Track -eq "gone") } | Select-Object -ExpandProperty Name
             $LocalOnlyBranches | ForEach-Object {
                 $LocalBranch = $_
                 if ($pscmdlet.ShouldProcess("$LocalBranch", "Remove branch with no upstream")) {
                     &git branch -D $LocalBranch
+                    If ($LASTEXITCODE -ne 0) {
+                        throw "Unable to delete branch."
+                        exit 1
+                    }
                 }
             }
         }

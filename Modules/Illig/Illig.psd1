@@ -33,7 +33,8 @@
         'Select-VsInstall',
         'Set-ConsoleEncoding',
         'Set-DotEnv',
-        'Test-AnsiSupport'
+        'Test-AnsiSupport',
+        'Update-GitFork'
     )
 
     # Cmdlets to export from this module
