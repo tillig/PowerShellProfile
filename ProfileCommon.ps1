@@ -20,6 +20,14 @@ If (($isDesktop -or $IsWindows)) {
     Invoke-VisualStudioDevPrompt
 }
 
+# Fix double-wide XML icon in Terminal-Icons
+# https://github.com/devblackops/Terminal-Icons/issues/34
+If ($Null -ne (Get-Module Terminal-Icons)) {
+    $fileIcons = (Get-TerminalIconsTheme).Icon.Types.Files
+    $xmlKeys = $fileIcons.Keys | Where-Object { $fileIcons[$_] -eq "nf-mdi-xml" }
+    $xmlKeys | % { $fileIcons[$_] = "nf-mdi-file_xml" }
+}
+
 # Aliases
 Set-Alias -Name which -Value Get-Command
 
