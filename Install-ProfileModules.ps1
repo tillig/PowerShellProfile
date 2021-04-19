@@ -5,7 +5,8 @@ $releaseModules = @(
     "ClipboardText",
     "oh-my-posh",
     "PSScriptAnalyzer",
-    "Pester"
+    "Pester",
+    "Terminal-Icons"
 )
 
 $preReleaseModules = @(

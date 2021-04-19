@@ -3,6 +3,7 @@ Import-Module VSSetup
 Import-Module ClipboardText
 Import-Module PSScriptAnalyzer
 Import-Module Pester
+Import-Module Terminal-Icons
 Import-Module Illig
 
 # Windows defaults to ASCII; set UTF-8 and verify ANSI color support.
