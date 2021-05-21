@@ -9,13 +9,16 @@
     The location with branches to remove.
 .EXAMPLE
    Remove-GitLocalOnly
+.EXAMPLE
+   Get-ChildItem -Directory | Remove-GitLocalOnly
 #>
 function Remove-GitLocalOnly {
     [CmdletBinding(SupportsShouldProcess = $True,
         ConfirmImpact = 'High')]
     Param(
         [Parameter(Mandatory = $False,
-            Position = 0)]
+            Position = 0,
+            ValueFromPipeline = $True)]
         [string]
         [ValidateNotNullOrEmpty()]
         $Path = $PWD
