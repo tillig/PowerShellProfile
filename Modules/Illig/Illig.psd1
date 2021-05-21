@@ -34,7 +34,8 @@
         'Set-ConsoleEncoding',
         'Set-DotEnv',
         'Test-AnsiSupport',
-        'Update-GitFork'
+        'Update-GitFork',
+        'Update-GitRepository'
     )
 
     # Cmdlets to export from this module

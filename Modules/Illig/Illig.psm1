@@ -5,6 +5,7 @@
 . $PSScriptRoot\Development\Reset-Source.ps1
 . $PSScriptRoot\Development\Set-DotEnv.ps1
 . $PSScriptRoot\Development\Update-GitFork.ps1
+. $PSScriptRoot\Development\Update-GitRepository.ps1
 . $PSScriptRoot\Development\VisualStudio.ps1
 . $PSScriptRoot\Kubernetes\Get-KubectlAll.ps1
 . $PSScriptRoot\Kubernetes\Get-KubectlShell.ps1
