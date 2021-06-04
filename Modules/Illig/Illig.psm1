@@ -4,6 +4,7 @@
 . $PSScriptRoot\Development\Remove-TempFiles.ps1
 . $PSScriptRoot\Development\Reset-Source.ps1
 . $PSScriptRoot\Development\Set-DotEnv.ps1
+. $PSScriptRoot\Development\Sync-AzureDevOpsProject.ps1
 . $PSScriptRoot\Development\Update-GitFork.ps1
 . $PSScriptRoot\Development\Update-GitRepository.ps1
 . $PSScriptRoot\Development\VisualStudio.ps1

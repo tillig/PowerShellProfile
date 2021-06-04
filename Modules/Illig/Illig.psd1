@@ -33,6 +33,7 @@
         'Select-VsInstall',
         'Set-ConsoleEncoding',
         'Set-DotEnv',
+        'Sync-AzureDevOpsProject',
         'Test-AnsiSupport',
         'Update-GitFork',
         'Update-GitRepository'
