@@ -16,7 +16,7 @@ function Reset-Source {
     Begin {
         Get-Command dotnet -ErrorAction Ignore | Out-Null
         if ($?) {
-            & dotnet nuget locals -clear all
+            & dotnet nuget locals -c all
         }
         else {
             Write-Warning 'dotnet CLI not found on path. Unable to clear NuGet cache.'
