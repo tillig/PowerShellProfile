@@ -69,3 +69,9 @@ if ($enableBashCompletions) {
     Register-BashArgumentCompleter git "$completionPath/git_completions.sh"
     Register-BashArgumentCompleter helm "$completionPath/helm_completions.sh"
 }
+
+# Set kubectl editor to VS Code if it's present.
+Get-Command code -ErrorAction Ignore | Out-Null
+if ($?) {
+    $Env:KUBE_EDITOR = "code --wait"
+}
