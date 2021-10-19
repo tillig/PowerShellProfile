@@ -6,22 +6,15 @@ Import-Module Pester
 Import-Module Terminal-Icons
 Import-Module Illig
 
+# Paths: Put user-specific paths in the OS location for that.
+# - On Windows, System/Advanced System Settings/Environment Variables
+# - On Mac/Linux, /etc/profile like
+# PATH="$PATH:$HOME/go/bin:$HOME/.dotnet/tools:$HOME/.krew/bin"
+
 # Windows defaults to ASCII; set UTF-8 and verify ANSI color support.
 Set-ConsoleEncoding -UTF8
 $Env:PYTHONIOENCODING = "UTF-8"
 Test-AnsiSupport | Out-Null
-
-# Paths
-$pathDelimiter = ':'
-If ($IsWindows) {
-    $pathDelimiter = ';'
-}
-$userPaths = @(
-    (Join-Path $HOME "go" "bin"),
-    (Join-Path $HOME ".dotnet" "tools"),
-    (Join-Path $HOME ".krew" "bin")
-)
-$env:PATH = "$($env:PATH)$pathDelimiter$([System.String]::Join($pathDelimiter, $userPaths))"
 
 # Import VS environment
 # As of VS 2019 16.2 there's a PowerShell module for developer VS prompt.
