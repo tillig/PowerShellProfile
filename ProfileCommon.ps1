@@ -60,14 +60,17 @@ if ($?) {
     }
 }
 
-# Only try enabling bash completions if bash/Git for Windows is here.
+# Bash completions in PowerShell
 $enableBashCompletions = ($Null -ne (Get-Command bash -ErrorAction Ignore)) -or ($Null -ne (Get-Command git -ErrorAction Ignore))
 if ($enableBashCompletions) {
     Import-Module PSBashCompletions
     $completionPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($profile), "bash-completion")
-    Register-BashArgumentCompleter kubectl "$completionPath/kubectl_completions.sh"
-    Register-BashArgumentCompleter git "$completionPath/git_completions.sh"
-    Register-BashArgumentCompleter helm "$completionPath/helm_completions.sh"
+    Get-ChildItem $completionPath -Exclude ".editorconfig" | ForEach-Object {
+        $completerFullPath = $_.FullName
+        $completerCommandName = $_.Name
+        Write-Host "$completerCommandName = $completerFullPath"
+        Register-BashArgumentCompleter $completerCommandName "$completerFullPath"
+    }
 }
 
 # Set kubectl editor to VS Code if it's present.
