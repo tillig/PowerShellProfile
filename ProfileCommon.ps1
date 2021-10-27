@@ -68,7 +68,6 @@ if ($enableBashCompletions) {
     Get-ChildItem $completionPath -Exclude ".editorconfig" | ForEach-Object {
         $completerFullPath = $_.FullName
         $completerCommandName = $_.Name
-        Write-Host "$completerCommandName = $completerFullPath"
         Register-BashArgumentCompleter $completerCommandName "$completerFullPath"
     }
 }
