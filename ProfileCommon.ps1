@@ -16,6 +16,12 @@ Set-ConsoleEncoding -UTF8
 $Env:PYTHONIOENCODING = "UTF-8"
 Test-AnsiSupport | Out-Null
 
+# Azure Artifacts Credential Provider doesn't actually cache the token very long
+# unless you keep MSAL enabled.
+# https://developercommunity.visualstudio.com/t/azure-artifacts-credential-provider-unable-to-auth/1519587
+# https://github.com/microsoft/artifacts-credprovider/issues/234
+$Env:NUGET_CREDENTIALPROVIDER_MSAL_ENABLED = "true"
+
 # Import VS environment
 # As of VS 2019 16.2 there's a PowerShell module for developer VS prompt.
 # However, it is NOT compatible with PowerShell Core.
