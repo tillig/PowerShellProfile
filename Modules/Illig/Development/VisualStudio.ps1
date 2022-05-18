@@ -5,6 +5,9 @@
    Looks at the VSPREFERRED variable to require a particular VS version;
    otherwise falls back from latest VS through 2010 to invoke the developer
    command prompt settings.
+
+   Sets the environment variable VSPROMPTVERSION if there is a prompt found and
+   invoked.
 .EXAMPLE
    Invoke-VisualStudioDevPrompt
 #>
@@ -28,7 +31,7 @@ function Invoke-VisualStudioDevPrompt {
                     Write-Verbose "Attempting VS load from $batPath..."
                     Invoke-WindowsBatchFile -Path "$batPath" -Silent
                     $vsYear = $vs.DisplayName -replace '.*\s+(\d\d\d\d).*', '${1}'
-                    $global:PromptEnvironment = " $([char]::ConvertFromUtf32(0x2302)) vs$vsYear " # 2302 = House
+                    $env:VSPROMPTVERSION = "$vsYear"
                     return
                 }
             }
@@ -38,7 +41,7 @@ function Invoke-VisualStudioDevPrompt {
                     try {
                         Write-Verbose "Attempting VS $rel load..."
                         Import-VisualStudioVars $rel
-                        $global:PromptEnvironment = " ⌂ vs$rel "
+                        $env:VSPROMPTVERSION = "$rel"
                         break;
                     }
                     catch { }

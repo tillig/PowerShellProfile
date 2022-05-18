@@ -54,6 +54,14 @@
           "type": "text"
         },
         {
+          "background": "#720dcf",
+          "foreground": "#ffffff",
+          "powerline_symbol": "",
+          "style": "powerline",
+          "template": "{{ if .Env.VSPROMPTVERSION }} ⌂ vs{{ .Env.VSPROMPTVERSION }} {{ end }}",
+          "type": "text"
+        },
+        {
           "background": "#00ffff",
           "foreground": "#000000",
           "powerline_symbol": "",
