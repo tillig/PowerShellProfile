@@ -4,7 +4,6 @@
 function Set-PoshContextEnvironment {
     $stackDepth = (Get-Location -Stack).Count
     $env:LOCATION_STACK_DEPTH = @{ $true = ''; $false = "$stackDepth" }[0 -eq $stackDepth];
-    Write-Host $env:LOCATION_STACK_DEPTH
 }
 
 if ($null -ne (Get-Command "oh-my-posh" -ErrorAction Ignore)) {
