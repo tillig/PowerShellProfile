@@ -3,7 +3,6 @@ $releaseModules = @(
     "PSBashCompletions",
     "VSSetup",
     "ClipboardText",
-    "oh-my-posh",
     "PSScriptAnalyzer",
     "Pester",
     "Terminal-Icons"

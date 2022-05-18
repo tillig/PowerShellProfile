@@ -1,4 +1,7 @@
 {
+  "cSpell.words": [
+    "powerline"
+  ],
   "files.watcherExclude": {
     "**/target": true
   },

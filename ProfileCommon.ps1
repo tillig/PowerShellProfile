@@ -1,4 +1,3 @@
-Import-Module oh-my-posh
 Import-Module VSSetup
 Import-Module ClipboardText
 Import-Module PSScriptAnalyzer
