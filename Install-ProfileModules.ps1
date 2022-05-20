@@ -2,7 +2,6 @@ Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 $releaseModules = @(
     "PSBashCompletions",
     "VSSetup",
-    "ClipboardText",
     "PSScriptAnalyzer",
     "Pester",
     "Terminal-Icons"
