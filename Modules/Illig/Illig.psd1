@@ -27,6 +27,7 @@
         'Invoke-VisualStudioDevPrompt',
         'Invoke-WindowsBatchFile',
         'New-MachineKey',
+        'New-UnsignedJwt',
         'Remove-GitLocalOnly',
         'Remove-KubectlContext',
         'Remove-TempFiles',

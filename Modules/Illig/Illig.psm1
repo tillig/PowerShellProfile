@@ -1,6 +1,7 @@
 ﻿. $PSScriptRoot\Development\Copy-ContainerImage.ps1
 . $PSScriptRoot\Development\Invoke-WindowsBatchFile.ps1
 . $PSScriptRoot\Development\New-MachineKey.ps1
+. $PSScriptRoot\Development\New-UnsignedJwt.ps1
 . $PSScriptRoot\Development\Remove-GitLocalOnly.ps1
 . $PSScriptRoot\Development\Remove-TempFiles.ps1
 . $PSScriptRoot\Development\Reset-Source.ps1
