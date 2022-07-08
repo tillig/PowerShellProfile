@@ -25,6 +25,7 @@
         'Export-PostmanItem',
         'Get-KubectlAll',
         'Get-KubectlShell',
+        'Import-PostmanItem',
         'Invoke-VisualStudioDevPrompt',
         'Invoke-WindowsBatchFile',
         'New-MachineKey',
