@@ -87,7 +87,6 @@ Function Export-PostmanItem {
             $singular = "environment"
         }
 
-        Write-Verbose "Target output folder: $fullOutputFolder"
         $targetWorkspace = $allWorkspaces | Where-Object { $_.name -eq $WorkspaceName } | Select-Object -First 1
         If ($Null -eq $targetWorkspace) {
             throw "Unable to find workspace: $WorkspaceName"
