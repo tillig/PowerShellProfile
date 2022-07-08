@@ -22,6 +22,7 @@
     FunctionsToExport = @(
         'AliasFunctionDir',
         'Copy-ContainerImage',
+        'Export-PostmanItem',
         'Get-KubectlAll',
         'Get-KubectlShell',
         'Invoke-VisualStudioDevPrompt',
