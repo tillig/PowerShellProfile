@@ -1,13 +1,17 @@
 ﻿. $PSScriptRoot\Development\Copy-ContainerImage.ps1
+. $PSScriptRoot\Development\Enable-Ruby.ps1
 . $PSScriptRoot\Development\Export-PostmanItem.ps1
+. $PSScriptRoot\Development\Get-Ruby.ps1
 . $PSScriptRoot\Development\Import-PostmanItem.ps1
 . $PSScriptRoot\Development\Invoke-WindowsBatchFile.ps1
 . $PSScriptRoot\Development\New-MachineKey.ps1
 . $PSScriptRoot\Development\Remove-GitLocalOnly.ps1
 . $PSScriptRoot\Development\Remove-TempFiles.ps1
+. $PSScriptRoot\Development\Reset-Ruby.ps1
 . $PSScriptRoot\Development\Reset-Source.ps1
 . $PSScriptRoot\Development\Set-DotEnv.ps1
 . $PSScriptRoot\Development\Sync-AzureDevOpsProject.ps1
+. $PSScriptRoot\Development\Test-Administrator.ps1
 . $PSScriptRoot\Development\Update-GitFork.ps1
 . $PSScriptRoot\Development\Update-GitRepository.ps1
 . $PSScriptRoot\Development\VisualStudio.ps1
