@@ -74,6 +74,31 @@ Function Export-PostmanItem {
             Invoke-RestMethod -Uri "$baseUrl/workspaces" -Headers $headers
         }
 
+        <#
+        .SYNOPSIS
+            Recurses an object tree and removes all properties named 'id.'
+        .DESCRIPTION
+            Useful in trimming out the properties in an API-exported collection.
+            When exporting from the UI, none of the ID properties come out.
+        .PARAMETER obj
+            The PSObject with properties to iterate/recurse over.
+        #>
+        Function Remove-IdProperty {
+            Param([PSObject] $obj)
+            $obj.Properties.Remove("id");
+            $obj.Members | Where-Object { $_.MemberType -eq 'NoteProperty' } | ForEach-Object {
+                $member = $_
+                If ($member.TypeNameOfValue -eq "System.Object[]" ) {
+                    $member.Value | ForEach-Object {
+                        Remove-IdProperty $_.PSObject
+                    }
+                }
+                ElseIf ($member.TypeNameOfValue -eq "System.Management.Automation.PSCustomObject") {
+                    Remove-IdProperty $member.Value.PSObject
+                }
+            }
+        }
+
         $allWorkspaces = Get-Workspaces | Select-Object -ExpandProperty "workspaces"
     }
 
@@ -99,6 +124,23 @@ Function Export-PostmanItem {
             throw "Unable to find item: $ItemName"
         }
         $itemToExport = Invoke-RestMethod -Uri "$baseUrl/$plural/$($itemMetadata.uid)`?workspaceId=$($targetWorkspace.id)" -Headers $headers | Select-Object -ExpandProperty $singular
+
+        # Update properties to be more like what comes from a UI export.
+        $itemToExport.PSObject.Properties.Remove("createdAt")
+        $itemToExport.PSObject.Properties.Remove("isPublic")
+        $itemToExport.PSObject.Properties.Remove("owner")
+        $itemToExport.PSObject.Properties.Remove("updatedAt")
+
+        If ([ItemType]::Collection -eq $ItemType) {
+            $itemToExport.info.PSObject.Properties.Remove("updatedAt")
+            Remove-IdProperty $itemToExport.PSObject
+        }
+        Else {
+            $itemToExport | Add-Member -MemberType NoteProperty -Name "_postman_exported_at" -Value (Get-Date -AsUTC -Format o)
+            $itemToExport | Add-Member -MemberType NoteProperty -Name "_postman_exported_using" -Value "PowerShell"
+            $itemToExport | Add-Member -MemberType NoteProperty -Name "_postman_variable_scope" -Value $singular
+        }
+
         $itemToExport | ConvertTo-Json -Depth 100
     }
 }
