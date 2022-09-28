@@ -64,6 +64,14 @@ if ($?) {
     }
 }
 
+# PowerShell completions
+# XXXX completions powershell > Register-XXXXCompletions.ps1
+Get-Command helm -ErrorAction Ignore | Out-Null
+$completionPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($profile), "ps-completion")
+Get-ChildItem $completionPath | ForEach-Object {
+    & $_.FullName
+}
+
 # Bash completions in PowerShell
 $enableBashCompletions = ($Null -ne (Get-Command bash -ErrorAction Ignore)) -or ($Null -ne (Get-Command git -ErrorAction Ignore))
 if ($enableBashCompletions) {
