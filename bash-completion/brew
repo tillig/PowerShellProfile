@@ -92,7 +92,7 @@ __brew_complete_tapped() {
   for dir in "${taplib}"/*/*
   do
     [[ -d "${dir}" ]] || continue
-    dir="${dir#${taplib}/}"
+    dir="${dir#"${taplib}"/}"
     dir="${dir/homebrew-/}"
     taps="${taps} ${dir}"
   done
@@ -276,6 +276,7 @@ _brew__s() {
       --debian
       --debug
       --desc
+      --eval-all
       --fedora
       --fink
       --formula
@@ -300,18 +301,19 @@ _brew_abv() {
   case "${cur}" in
     -*)
       __brewcomp "
-      --all
       --analytics
       --cask
       --category
       --days
       --debug
+      --eval-all
       --formula
       --github
       --help
       --installed
       --json
       --quiet
+      --variations
       --verbose
       "
       return
@@ -351,12 +353,14 @@ _brew_audit() {
       --display-cop-names
       --display-failures-only
       --display-filename
+      --eval-all
       --except
       --except-cops
       --fix
       --formula
       --git
       --help
+      --installed
       --new
       --no-appcast
       --online
@@ -436,6 +440,7 @@ _brew_bump() {
       --help
       --limit
       --no-pull-requests
+      --open-pr
       --quiet
       --start-with
       --verbose
@@ -496,6 +501,9 @@ _brew_bump_formula_pr() {
       --no-browse
       --no-fork
       --online
+      --python-exclude-packages
+      --python-extra-packages
+      --python-package-name
       --quiet
       --revision
       --sha256
@@ -523,6 +531,7 @@ _brew_bump_revision() {
       --help
       --message
       --quiet
+      --remove-bottle-block
       --verbose
       --write-only
       "
@@ -663,6 +672,25 @@ _brew_config() {
   esac
 }
 
+_brew_contributions() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  case "${cur}" in
+    -*)
+      __brewcomp "
+      --debug
+      --from
+      --help
+      --quiet
+      --repositories
+      --to
+      --verbose
+      "
+      return
+      ;;
+    *)
+  esac
+}
+
 _brew_create() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   case "${cur}" in
@@ -702,14 +730,16 @@ _brew_deps() {
   case "${cur}" in
     -*)
       __brewcomp "
-      --1
-      --all
       --annotate
       --cask
       --debug
+      --direct
+      --dot
+      --eval-all
       --for-each
       --formula
       --full-name
+      --graph
       --help
       --include-build
       --include-optional
@@ -718,10 +748,10 @@ _brew_deps() {
       --installed
       --quiet
       --skip-recommended
+      --topological
       --tree
       --union
       --verbose
-      -n
       "
       return
       ;;
@@ -736,8 +766,11 @@ _brew_desc() {
   case "${cur}" in
     -*)
       __brewcomp "
+      --cask
       --debug
       --description
+      --eval-all
+      --formula
       --help
       --name
       --quiet
@@ -749,6 +782,7 @@ _brew_desc() {
     *)
   esac
   __brew_complete_formulae
+  __brew_complete_casks
 }
 
 _brew_developer() {
@@ -792,6 +826,22 @@ _brew_dispatch_build_bottle() {
     *)
   esac
   __brew_complete_formulae
+}
+
+_brew_docs() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  case "${cur}" in
+    -*)
+      __brewcomp "
+      --debug
+      --help
+      --quiet
+      --verbose
+      "
+      return
+      ;;
+    *)
+  esac
 }
 
 _brew_doctor() {
@@ -945,7 +995,6 @@ _brew_generate_man_completions() {
     -*)
       __brewcomp "
       --debug
-      --fail-if-not-changed
       --help
       --quiet
       --verbose
@@ -1021,18 +1070,19 @@ _brew_info() {
   case "${cur}" in
     -*)
       __brewcomp "
-      --all
       --analytics
       --cask
       --category
       --days
       --debug
+      --eval-all
       --formula
       --github
       --help
       --installed
       --json
       --quiet
+      --variations
       --verbose
       "
       return
@@ -1059,9 +1109,9 @@ _brew_instal() {
       --cc
       --colorpickerdir
       --debug
+      --debug-symbols
       --dictionarydir
       --display-times
-      --env
       --fetch-HEAD
       --fontdir
       --force
@@ -1080,6 +1130,7 @@ _brew_instal() {
       --no-binaries
       --no-quarantine
       --only-dependencies
+      --overwrite
       --prefpanedir
       --qlplugindir
       --quarantine
@@ -1091,6 +1142,7 @@ _brew_instal() {
       --verbose
       --vst-plugindir
       --vst3-plugindir
+      --zap
       "
       return
       ;;
@@ -1116,9 +1168,9 @@ _brew_install() {
       --cc
       --colorpickerdir
       --debug
+      --debug-symbols
       --dictionarydir
       --display-times
-      --env
       --fetch-HEAD
       --fontdir
       --force
@@ -1137,6 +1189,7 @@ _brew_install() {
       --no-binaries
       --no-quarantine
       --only-dependencies
+      --overwrite
       --prefpanedir
       --qlplugindir
       --quarantine
@@ -1148,6 +1201,7 @@ _brew_install() {
       --verbose
       --vst-plugindir
       --vst3-plugindir
+      --zap
       "
       return
       ;;
@@ -1197,9 +1251,9 @@ _brew_lc() {
   case "${cur}" in
     -*)
       __brewcomp "
-      --all
       --cask
       --debug
+      --eval-all
       --formula
       --full-name
       --help
@@ -1267,6 +1321,7 @@ _brew_linkage() {
       --help
       --quiet
       --reverse
+      --strict
       --test
       --verbose
       "
@@ -1310,9 +1365,9 @@ _brew_livecheck() {
   case "${cur}" in
     -*)
       __brewcomp "
-      --all
       --cask
       --debug
+      --eval-all
       --formula
       --full-name
       --help
@@ -1447,10 +1502,10 @@ _brew_options() {
   case "${cur}" in
     -*)
       __brewcomp "
-      --all
       --command
       --compact
       --debug
+      --eval-all
       --help
       --installed
       --quiet
@@ -1527,7 +1582,6 @@ _brew_pr_automerge() {
   case "${cur}" in
     -*)
       __brewcomp "
-      --autosquash
       --debug
       --help
       --ignore-failures
@@ -1539,6 +1593,7 @@ _brew_pr_automerge() {
       --with-label
       --without-approval
       --without-labels
+      --workflow
       "
       return
       ;;
@@ -1551,7 +1606,6 @@ _brew_pr_publish() {
   case "${cur}" in
     -*)
       __brewcomp "
-      --autosquash
       --branch
       --debug
       --help
@@ -1574,7 +1628,6 @@ _brew_pr_pull() {
     -*)
       __brewcomp "
       --artifact
-      --autosquash
       --branch-okay
       --clean
       --committer
@@ -1584,6 +1637,7 @@ _brew_pr_pull() {
       --ignore-missing-artifacts
       --keep-old
       --message
+      --no-autosquash
       --no-commit
       --no-upload
       --quiet
@@ -1609,7 +1663,6 @@ _brew_pr_upload() {
       --committer
       --debug
       --dry-run
-      --github-org
       --help
       --keep-old
       --no-commit
@@ -1651,6 +1704,7 @@ _brew_readall() {
       __brewcomp "
       --aliases
       --debug
+      --eval-all
       --help
       --quiet
       --syntax
@@ -1675,6 +1729,7 @@ _brew_reinstall() {
       --cask
       --colorpickerdir
       --debug
+      --debug-symbols
       --dictionarydir
       --display-times
       --fontdir
@@ -1702,6 +1757,7 @@ _brew_reinstall() {
       --verbose
       --vst-plugindir
       --vst3-plugindir
+      --zap
       "
       return
       ;;
@@ -1805,6 +1861,7 @@ _brew_search() {
       --debian
       --debug
       --desc
+      --eval-all
       --fedora
       --fink
       --formula
@@ -1843,22 +1900,6 @@ _brew_sh() {
   __brew_complete_files
 }
 
-_brew_sponsors() {
-  local cur="${COMP_WORDS[COMP_CWORD]}"
-  case "${cur}" in
-    -*)
-      __brewcomp "
-      --debug
-      --help
-      --quiet
-      --verbose
-      "
-      return
-      ;;
-    *)
-  esac
-}
-
 _brew_style() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   case "${cur}" in
@@ -1893,13 +1934,13 @@ _brew_tap() {
       __brewcomp "
       --custom-remote
       --debug
+      --eval-all
       --force-auto-update
-      --full
       --help
       --list-pinned
+      --no-force-auto-update
       --quiet
       --repair
-      --shallow
       --verbose
       "
       return
@@ -1935,6 +1976,7 @@ _brew_tap_new() {
       __brewcomp "
       --branch
       --debug
+      --github-packages
       --help
       --no-git
       --pull-label
@@ -1955,7 +1997,6 @@ _brew_tc() {
       __brewcomp "
       --debug
       --dir
-      --fail-if-not-changed
       --file
       --fix
       --help
@@ -1963,6 +2004,7 @@ _brew_tc() {
       --quiet
       --suggest-typed
       --update
+      --update-all
       --verbose
       "
       return
@@ -1998,6 +2040,7 @@ _brew_tests() {
     -*)
       __brewcomp "
       --byebug
+      --changed
       --coverage
       --debug
       --generic
@@ -2022,7 +2065,6 @@ _brew_typecheck() {
       __brewcomp "
       --debug
       --dir
-      --fail-if-not-changed
       --file
       --fix
       --help
@@ -2030,6 +2072,7 @@ _brew_typecheck() {
       --quiet
       --suggest-typed
       --update
+      --update-all
       --verbose
       "
       return
@@ -2045,6 +2088,7 @@ _brew_unbottled() {
       __brewcomp "
       --debug
       --dependents
+      --eval-all
       --help
       --quiet
       --tag
@@ -2183,11 +2227,12 @@ _brew_up() {
   case "${cur}" in
     -*)
       __brewcomp "
+      --auto-update
       --debug
       --force
       --help
       --merge
-      --preinstall
+      --quiet
       --verbose
       "
       return
@@ -2201,11 +2246,12 @@ _brew_update() {
   case "${cur}" in
     -*)
       __brewcomp "
+      --auto-update
       --debug
       --force
       --help
       --merge
-      --preinstall
+      --quiet
       --verbose
       "
       return
@@ -2220,7 +2266,6 @@ _brew_update_license_data() {
     -*)
       __brewcomp "
       --debug
-      --fail-if-not-changed
       --help
       --quiet
       --verbose
@@ -2276,10 +2321,26 @@ _brew_update_report() {
   case "${cur}" in
     -*)
       __brewcomp "
+      --auto-update
       --debug
       --force
       --help
-      --preinstall
+      --quiet
+      --verbose
+      "
+      return
+      ;;
+    *)
+  esac
+}
+
+_brew_update_sponsors() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  case "${cur}" in
+    -*)
+      __brewcomp "
+      --debug
+      --help
       --quiet
       --verbose
       "
@@ -2321,6 +2382,7 @@ _brew_upgrade() {
       --cask
       --colorpickerdir
       --debug
+      --debug-symbols
       --dictionarydir
       --display-times
       --dry-run
@@ -2369,6 +2431,7 @@ _brew_uses() {
       __brewcomp "
       --cask
       --debug
+      --eval-all
       --formula
       --help
       --include-build
@@ -2459,11 +2522,13 @@ _brew() {
     commands) _brew_commands ;;
     completions) _brew_completions ;;
     config) _brew_config ;;
+    contributions) _brew_contributions ;;
     create) _brew_create ;;
     deps) _brew_deps ;;
     desc) _brew_desc ;;
     developer) _brew_developer ;;
     dispatch-build-bottle) _brew_dispatch_build_bottle ;;
+    docs) _brew_docs ;;
     doctor) _brew_doctor ;;
     dr) _brew_dr ;;
     edit) _brew_edit ;;
@@ -2508,7 +2573,6 @@ _brew() {
     ruby) _brew_ruby ;;
     search) _brew_search ;;
     sh) _brew_sh ;;
-    sponsors) _brew_sponsors ;;
     style) _brew_style ;;
     tap) _brew_tap ;;
     tap-info) _brew_tap_info ;;
@@ -2530,6 +2594,7 @@ _brew() {
     update-maintainers) _brew_update_maintainers ;;
     update-python-resources) _brew_update_python_resources ;;
     update-report) _brew_update_report ;;
+    update-sponsors) _brew_update_sponsors ;;
     update-test) _brew_update_test ;;
     upgrade) _brew_upgrade ;;
     uses) _brew_uses ;;
