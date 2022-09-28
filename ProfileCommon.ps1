@@ -64,12 +64,12 @@ if ($?) {
     }
 }
 
-# PowerShell completions
-# XXXX completions powershell > Register-XXXXCompletions.ps1
-Get-Command helm -ErrorAction Ignore | Out-Null
-$completionPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($profile), "ps-completion")
-Get-ChildItem $completionPath | ForEach-Object {
-    & $_.FullName
+# PowerShell native completions
+@("helm", "istioctl", "k9s", "kubectl") | ForEach-Object {
+    $command = $_
+    if (Get-Command $command -ErrorAction SilentlyContinue) {
+        & $command completion powershell | Out-String | Invoke-Expression
+    }
 }
 
 # Bash completions in PowerShell

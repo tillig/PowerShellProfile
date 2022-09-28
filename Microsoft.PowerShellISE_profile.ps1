@@ -1,4 +1,4 @@
-﻿& $PSScriptRoot/ProfileCommon.ps1
+﻿. $PSScriptRoot/ProfileCommon.ps1
 
 #Script Browser Begin
 #Version: 1.3.2
