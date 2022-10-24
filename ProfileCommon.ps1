@@ -53,6 +53,11 @@ if ($isDesktop -or $IsWindows) {
     }
 }
 
+# Homebrew settings
+if ($IsMacOS -and ($null -ne (Get-Command "brew" -ErrorAction Ignore))) {
+    $(brew shellenv) | Invoke-Expression
+}
+
 # PowerShell parameter completion shim for the dotnet CLI
 Get-Command dotnet -ErrorAction Ignore | Out-Null
 if ($?) {
