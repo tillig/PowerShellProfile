@@ -37,7 +37,7 @@ function Remove-GitLocalOnly {
         Try {
             Push-Location $Path
             $ToParse = "["
-            $ToParse += (&git branch --format "{\`"Name\`":\`"%(refname:short)\`",\`"Remote\`":\`"%(upstream)\`",\`"Track\`":\`"%(upstream:track,nobracket)\`"}") -Join ","
+            $ToParse += (&git branch --format "{`"Name`":`"%(refname:short)`",`"Remote`":`"%(upstream)`",`"Track`":`"%(upstream:track,nobracket)`"}") -Join ","
             $ToParse += "]"
             If ($LASTEXITCODE -ne 0) {
                 throw "Unable to retrieve branches."

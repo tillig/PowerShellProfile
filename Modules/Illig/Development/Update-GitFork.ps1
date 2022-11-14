@@ -76,7 +76,7 @@ function Update-GitFork {
             # Get the branches we have locally
             Write-Verbose "Getting the list of local branches."
             $toParse = "["
-            $toParse += (&git branch --format "{\`"Name\`":\`"%(refname:short)\`",\`"Remote\`":\`"%(upstream)\`",\`"Track\`":\`"%(upstream:track,nobracket)\`"}") -Join ","
+            $toParse += (&git branch --format "{`"Name`":`"%(refname:short)`",`"Remote`":`"%(upstream)`",`"Track`":`"%(upstream:track,nobracket)`"}") -Join ","
             $toParse += "]"
             If ($LASTEXITCODE -ne 0) {
                 throw "Unable to retrieve branches."
