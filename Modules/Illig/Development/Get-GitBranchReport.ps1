@@ -60,7 +60,7 @@ function Get-GitBranchReport {
             Push-Location $Path
             $branches = git branch -r --format "%(refname)" | Where-Object { -Not $_.EndsWith("/HEAD") }
             If (-Not $IncludeMain) {
-            $branches = $branches | Where-Object {
+                $branches = $branches | Where-Object {
                     $branch = $_
                     $allow = $True
                     $MainBranches | ForEach-Object {
