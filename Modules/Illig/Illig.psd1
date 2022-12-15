@@ -24,6 +24,7 @@
         'Copy-ContainerImage',
         'Enable-Ruby',
         'Export-PostmanItem',
+        'Get-GitBranchReport',
         'Get-KubectlAll',
         'Get-KubectlShell',
         'Get-Ruby',
