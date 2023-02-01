@@ -31,6 +31,7 @@
     If specified, the primary dev branches are included.
 #>
 function Get-GitBranchReport {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Scope='Function', Target='allow')]
     [CmdletBinding(SupportsShouldProcess = $True)]
     Param(
         [Parameter(Mandatory = $False, Position = 0)]
