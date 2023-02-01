@@ -16,6 +16,10 @@
     The Azure DevOps organization URL (https://dev.azure.com/MyOrg/)
 .PARAMETER Project
     The project in the Azure DevOps organization to clone.
+.PARAMETER Exclude
+    A list of one or more regular expression strings. If a repository name
+    matches any of these expressions, it won't be synchronized unless there's
+    already a folder/clone matching that name (e.g., you manually cloned it).
 .EXAMPLE
    Sync-AzureDevOpsProject -Organization https://dev.azure.com/MyOrg -Project "My Project"
 #>
@@ -35,7 +39,11 @@ function Sync-AzureDevOpsProject {
         [Parameter(Mandatory = $True)]
         [string]
         [ValidateNotNullOrEmpty()]
-        $Project
+        $Project,
+
+        [Parameter(Mandatory = $False)]
+        [string[]]
+        $Exclude = @()
     )
     Begin {
         $git = Get-Command git -ErrorAction Ignore
@@ -54,27 +62,25 @@ function Sync-AzureDevOpsProject {
             Write-Error "Unable to find path $Path"
             Exit 1
         }
-
-        Write-Progress -Activity "Synchronizing Azure DevOps project" -Status "Starting..."
     }
     Process {
-
+        # Not using Write-Progress because it makes it really hard to figure out where any failures happen.
         Try {
-            Write-Progress -Activity "Synchronizing Azure DevOps project" -Status "Preparing $Path..."
             Push-Location $Path
             $currentFolders = Get-ChildItem -Directory | Select-Object -ExpandProperty "Name"
 
-            Write-Progress -Activity "Synchronizing Azure DevOps project" -Status "Querying $Organization/$Project..."
-            $repos = az repos list --org $Organization -p $Project | ConvertFrom-Json
+            Write-Verbose "Querying $Organization/$Project..."
+            $repos = az repos list --org $Organization -p $Project | ConvertFrom-Json -Depth 100 -NoEnumerate
             If ($LASTEXITCODE -ne 0) {
                 throw "Unable to use az CLI to query $Organization/$Project. Check for typos, Azure CLI context, authentication issues."
             }
 
+            Write-Verbose "Found $($repos.Count) repositories."
             $repos | ForEach-Object {
                 $repo = $_
                 $repoName = $repo.name
                 If ($currentFolders -contains $repoName) {
-                    Write-Progress -Activity "Synchronizing Azure DevOps project" -Status "Updating $repoName clone..."
+                    Write-Information -MessageData "Updating $repoName clone..." -InformationAction Continue
                     Try {
                         If ($PSCmdlet.ShouldProcess($repoName, "Update existing clone")) {
                             Update-GitRepository -Path $repoName
@@ -85,15 +91,26 @@ function Sync-AzureDevOpsProject {
                     }
                 }
                 Else {
-                    Write-Progress -Activity "Synchronizing Azure DevOps project" -Status "Cloning $repoName..."
-                    $url = $repo.remoteUrl
-                    If ($PSCmdlet.ShouldProcess($repoName, "Create new clone")) {
-                        git clone --recurse-submodules -q $url
+                    $excluded = $False
+                    If ($null -ne $Exclude) {
+                        $Exclude | ForEach-Object {
+                            If ($repoName -match $_) {
+                                Write-Information -MessageData "Excluding repo $repoName based on exclusion '$_'." -InformationAction Continue
+                                $excluded = $True
+                            }
+                        }
+                    }
+                    If (-not $excluded) {
+                        Write-Information -MessageData "Cloning $repoName..." -InformationAction Continue
+                        $url = $repo.remoteUrl
+                        If ($PSCmdlet.ShouldProcess($repoName, "Create new clone")) {
+                            git clone --recurse-submodules -q $url
+                        }
                     }
                 }
             }
 
-            Write-Progress -Activity "Synchronizing Azure DevOps project" -Status "Checking for extra folders..."
+            Write-Verbose "Checking for extra folders..."
             $currentFolders | ForEach-Object {
                 $folderName = $_
                 $found = $repos | Where-Object { $_.name -eq $folderName }
@@ -105,8 +122,5 @@ function Sync-AzureDevOpsProject {
         Finally {
             Pop-Location
         }
-    }
-    End {
-        Write-Progress -Activity "Synchronizing Azure DevOps project" -Completed
     }
 }
