@@ -42,7 +42,15 @@ function Get-KubectlAll {
 
         Write-Progress -Activity "Getting resources..."
         Write-Progress -Activity "Getting resources..." -CurrentOperation "Retrieving resource IDs from Kubernetes..." -PercentComplete 5
-        $resourceList = ([String]::Join(',', (&"$kubectl" api-resources -o name $namespaced)) -replace ',events[^,]*,', ',') -replace ',$', ''
+        $allResources = &"$kubectl" api-resources -o name $namespaced
+        $filteredResources = $allResources | Where-Object {
+            # No events, too noisy
+            (-not ($_ -match 'events')) -and
+            # No external metrics, causes problems with kubectl
+            (-not ($_ -match '\.external\.metrics\.k8s\.io'))
+        }
+        $resourceList = [String]::Join(',', $filteredResources)
+
         Write-Verbose "Resource list: $resourceList"
         Write-Progress -Activity "Getting resources..." -CurrentOperation "Retrieving resources from Kubernetes..." -PercentComplete 50
 
