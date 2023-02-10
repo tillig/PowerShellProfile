@@ -32,6 +32,7 @@
         'Invoke-VisualStudioDevPrompt',
         'Invoke-WindowsBatchFile',
         'New-MachineKey',
+        'Open-GitRemote',
         'Remove-GitLocalOnly',
         'Remove-KubectlContext',
         'Remove-TempFiles',

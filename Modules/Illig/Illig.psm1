@@ -6,6 +6,7 @@
 . $PSScriptRoot\Development\Import-PostmanItem.ps1
 . $PSScriptRoot\Development\Invoke-WindowsBatchFile.ps1
 . $PSScriptRoot\Development\New-MachineKey.ps1
+. $PSScriptRoot\Development\Open-GitRemote.ps1
 . $PSScriptRoot\Development\Remove-GitLocalOnly.ps1
 . $PSScriptRoot\Development\Remove-TempFiles.ps1
 . $PSScriptRoot\Development\Reset-Ruby.ps1
