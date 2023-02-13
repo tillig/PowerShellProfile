@@ -282,20 +282,20 @@ function Open-GitRemote {
             }
 
             <#
-        git status --branch --porcelain=2
+            git status --branch --porcelain=2
 
-        yields
+            yields
 
-        # branch.oid a9b153f2c59d8dc2f721df8c0584069ebd33e55b
-        # branch.head master
-        # branch.upstream origin/master
-        # branch.ab +0 -0
+            # branch.oid a9b153f2c59d8dc2f721df8c0584069ebd33e55b
+            # branch.head master
+            # branch.upstream origin/master
+            # branch.ab +0 -0
 
-        or
+            or
 
-        # branch.oid 070835a3cdc52279f046cf3973c0b242d302522e
-        # branch.head (detached)
-        #>
+            # branch.oid 070835a3cdc52279f046cf3973c0b242d302522e
+            # branch.head (detached)
+            #>
             $gitStatus = &git status --branch --porcelain=2
             If ($LASTEXITCODE -ne 0) {
                 throw "Unable to get git status."
@@ -331,16 +331,16 @@ function Open-GitRemote {
             )
 
             <#
-        The basic algorithm appears to be...
-        - Get the git remote.
-        - If no detached head, get the current branch name.
-        - If detached head, get the commit.
-        - Calculate the location based on branch (getUrlForBranch()) or commit (getUrlForCommit())
-        - Detached head at a tag (doesn't seem like there's specific URL support for this?)
+            The basic algorithm appears to be...
+            - Get the git remote.
+            - If no detached head, get the current branch name.
+            - If detached head, get the commit.
+            - Calculate the location based on branch (getUrlForBranch()) or commit (getUrlForCommit())
+            - Detached head at a tag (doesn't seem like there's specific URL support for this?)
 
-        If branch.head is "(detached)" then use the the commit if not.
-        If branch.head is something else, that's the branch.
-        #>
+            If branch.head is "(detached)" then use the the commit if not.
+            If branch.head is something else, that's the branch.
+            #>
             Write-Verbose "Calculating web view from remote host '$($GitInfo.Domain)'."
             $provider = $providers | Where-Object { $GitInfo.Domain -match $_.HostMatch } | Select-Object -First 1
             If ($null -eq $provider) {
