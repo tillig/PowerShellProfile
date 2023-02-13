@@ -24,6 +24,7 @@
    Sync-AzureDevOpsProject -Organization https://dev.azure.com/MyOrg -Project "My Project"
 #>
 function Sync-AzureDevOpsProject {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Scope='Function', Target='excluded')]
     [CmdletBinding(SupportsShouldProcess = $True)]
     Param(
         [Parameter(Mandatory = $False)]
@@ -76,7 +77,7 @@ function Sync-AzureDevOpsProject {
             }
 
             Write-Verbose "Found $($repos.Count) repositories."
-            $repos | ForEach-Object {
+            $repos | Sort-Object -Property name | ForEach-Object {
                 $repo = $_
                 $repoName = $repo.name
                 If ($currentFolders -contains $repoName) {
