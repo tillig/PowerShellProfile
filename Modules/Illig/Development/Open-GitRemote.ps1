@@ -118,7 +118,7 @@ function Open-GitRemote {
                     }
                 }
 
-            ([GitProvider]$this).SetWebViewBaseUrl($GitInfo)
+                ([GitProvider]$this).SetWebViewBaseUrl($GitInfo)
             }
         }
         class BitbucketGitProvider : GitProvider {
@@ -163,18 +163,18 @@ function Open-GitRemote {
                 }
 
                 <#
-            Git remote URLs differs when cloned by HTTPS with or without authentication.
-            An anonymous clone looks like:
-            $ git clone "https://review.gerrithub.io/jenkinsci/gerrit-code-review-plugin"
-            An authenticated clone looks like:
-            $ git clone "https://username@review.gerrithub.io/a/jenkinsci/gerrit-code-review-plugin"
-            Where username may be omitted, but the "a/" prefix is always present.
-            #>
+                Git remote URLs differs when cloned by HTTPS with or without authentication.
+                An anonymous clone looks like:
+                $ git clone "https://review.gerrithub.io/jenkinsci/gerrit-code-review-plugin"
+                An authenticated clone looks like:
+                $ git clone "https://username@review.gerrithub.io/a/jenkinsci/gerrit-code-review-plugin"
+                Where username may be omitted, but the "a/" prefix is always present.
+                #>
                 If ($GitInfo.Scheme.StartsWith("http")) {
                     $GitInfo.Path = $GitInfo.Path -replace "^a\//", ''
                 }
 
-            ([GitProvider]$this).SetWebViewBaseUrl($GitInfo)
+                ([GitProvider]$this).SetWebViewBaseUrl($GitInfo)
             }
         }
         class GiteaGitProvider : GitProvider {
