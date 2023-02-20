@@ -61,6 +61,7 @@ function Open-GitRemote {
                     return
                 }
                 $GitInfo.WebViewBaseUrl = "https://$($GitInfo.Domain)/$($GitInfo.Path)"
+                Write-Verbose "Set web view base URL to $($GitInfo.WebViewBaseUrl)"
             }
             [string]EncodeUri([string]$uri) {
                 # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/remotes/remoteProvider.ts
@@ -213,6 +214,14 @@ function Open-GitRemote {
                 $this.Name = "GitLab"
                 $this.HostMatch = "gitlab\.com"
             }
+            [string]GetUrlForBranch([GitInfo]$GitInfo) {
+                $this.SetWebViewBaseUrl($GitInfo)
+                return $this.EncodeUri("$($GitInfo.WebViewBaseUrl)/-/tree/$($GitInfo.Head)")
+            }
+            [string]GetUrlForCommit([GitInfo]$GitInfo) {
+                $this.SetWebViewBaseUrl($GitInfo)
+                return $this.EncodeUri("$($GitInfo.WebViewBaseUrl)/-/commit/$($GitInfo.Hash)")
+            }
         }
         class GitLabCustomDomainGitProvider : GitLabGitProvider {
             GitLabCustomDomainGitProvider() {
@@ -345,6 +354,9 @@ function Open-GitRemote {
             $provider = $providers | Where-Object { $GitInfo.Domain -match $_.HostMatch } | Select-Object -First 1
             If ($null -eq $provider) {
                 throw "Unable to determine web view for remote URL $($GitInfo.Domain)"
+            }
+            Else {
+                Write-Verbose "Using remote provider $($provider.Name)."
             }
 
             If ($GitInfo.IsDetachedHead()) {
