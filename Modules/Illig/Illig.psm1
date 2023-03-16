@@ -13,6 +13,7 @@
 . $PSScriptRoot\Development\Reset-Source.ps1
 . $PSScriptRoot\Development\Set-DotEnv.ps1
 . $PSScriptRoot\Development\Sync-AzureDevOpsProject.ps1
+. $PSScriptRoot\Development\Sync-GitHubOrganization.ps1
 . $PSScriptRoot\Development\Test-Administrator.ps1
 . $PSScriptRoot\Development\Update-GitFork.ps1
 . $PSScriptRoot\Development\Update-GitRepository.ps1

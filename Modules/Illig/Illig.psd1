@@ -42,6 +42,7 @@
         'Set-ConsoleEncoding',
         'Set-DotEnv',
         'Sync-AzureDevOpsProject',
+        'Sync-GitHubOrganization',
         'Test-Administrator',
         'Test-AnsiSupport',
         'Update-GitFork',
