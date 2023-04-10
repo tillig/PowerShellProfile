@@ -55,7 +55,7 @@ function Sync-GitHubOrganization {
         # Not using Write-Progress because it makes it really hard to figure out where any failures happen.
         Try {
             Push-Location $Path
-            $currentFolders = Get-ChildItem -Directory | Select-Object -ExpandProperty "Name"
+            $currentFolders = Get-ChildItem -Directory -Force | Select-Object -ExpandProperty "Name"
 
             Write-Verbose "Querying $Organization..."
             $repos = @()
