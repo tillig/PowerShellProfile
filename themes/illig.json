@@ -13,7 +13,7 @@
           },
           "style": "powerline",
           "template": "[⌧ {{ if gt .Code 0 }} {{ .Meaning }}{{ else }}{{ end }}]",
-          "type": "exit"
+          "type": "status"
         },
         {
           "background": "#ff0000",
