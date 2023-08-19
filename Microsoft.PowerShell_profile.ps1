@@ -15,3 +15,7 @@ if ($null -ne (Get-Command "oh-my-posh" -ErrorAction Ignore)) {
 if (Get-Command kubectl -ErrorAction SilentlyContinue) {
     kubectl completion powershell | Out-String | Invoke-Expression
 }
+$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+if (Test-Path($ChocolateyProfile)) {
+  Import-Module "$ChocolateyProfile"
+}
