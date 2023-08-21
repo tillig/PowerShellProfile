@@ -31,7 +31,7 @@
           "foreground": "#ffffff",
           "powerline_symbol": "",
           "style": "powerline",
-          "template": " {{ if .SSHSession }} {{ end }}{{ .UserName }}@{{ .HostName }} ",
+          "template": " {{ if .SSHSession }}󰌘 {{ end }}{{ .UserName }}@{{ .HostName }} ",
           "type": "session"
         },
         {
@@ -42,7 +42,7 @@
             "style": "short"
           },
           "style": "powerline",
-          "template": "  {{ .Path }} ",
+          "template": " 󰉋 {{ .Path }} ",
           "type": "path"
         },
         {
@@ -97,7 +97,7 @@
             "fetch_status": true
           },
           "style": "powerline",
-          "template": " {{ .HEAD }} {{ .BranchStatus }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}}  {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}}  {{ .WorktreeCount }}{{ end }} ",
+          "template": " {{ .HEAD }} {{ .BranchStatus }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}} 󰆓 {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}}  {{ .WorktreeCount }}{{ end }} ",
           "type": "git"
         }
       ],
