@@ -86,7 +86,7 @@
           "foreground": "#000000",
           "powerline_symbol": "",
           "style": "powerline",
-          "template": " ﴃ {{ .Name }} ",
+          "template": " 󰠅 {{ .Name }} ",
           "type": "az"
         },
         {
