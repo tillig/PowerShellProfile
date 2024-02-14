@@ -58,6 +58,16 @@ if ($IsMacOS -and ($null -ne (Get-Command "brew" -ErrorAction Ignore))) {
     $(brew shellenv) | Invoke-Expression
 }
 
+
+# nvs auto version switching - https://github.com/jasongin/nvs
+if ($null -ne (Get-Command "nvs" -ErrorAction Ignore)) {
+    if (Test-Path "~/.nvmrc") {
+        nvs use auto | Out-Null
+    }
+
+    nvs auto on
+}
+
 # PowerShell parameter completion shim for the dotnet CLI
 Get-Command dotnet -ErrorAction Ignore | Out-Null
 if ($?) {
