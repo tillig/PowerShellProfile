@@ -90,6 +90,14 @@
           "type": "az"
         },
         {
+          "background": "#571486",
+          "foreground": "#ffffff",
+          "powerline_symbol": "",
+          "style": "powerline",
+          "type": "gcp",
+          "template": " {{.Account}}"
+        },
+        {
           "background": "#00cc00",
           "foreground": "#000000",
           "powerline_symbol": "",
