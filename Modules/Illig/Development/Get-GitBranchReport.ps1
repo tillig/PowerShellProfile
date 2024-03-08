@@ -76,7 +76,10 @@ function Get-GitBranchReport {
             $report = @()
             $branches | ForEach-Object {
                 $branch = $_
-                $branchInfo = git show --format="{`"Date`":`"%ai`",`"Relative`":`"%ar`",`"Author`":`"%an`"}" $_ | Select-Object -First 1 | ConvertFrom-Json
+
+                # Fix CHECKFREE\user -> CHECKFREE\\user
+                # The replacement looks weird but the first param is a regex (escaped) and the second is a literal string.
+                $branchInfo = git show --format="{`"Date`":`"%ai`",`"Relative`":`"%ar`",`"Author`":`"%an`"}" $_ | Select-Object -First 1 | ForEach-Object { $_ -replace '\\','\\' } ConvertFrom-Json
                 $reportObject = [PSCustomObject]@{
                     Branch = $branch.Replace("refs/remotes/origin/","")
                     Date = [System.DateTimeOffset]::Parse($branchInfo.Date).ToLocalTime()
