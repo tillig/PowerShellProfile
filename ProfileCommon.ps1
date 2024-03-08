@@ -20,13 +20,21 @@ Test-AnsiSupport | Out-Null
 # https://github.com/microsoft/artifacts-credprovider/issues/234
 $Env:NUGET_CREDENTIALPROVIDER_MSAL_ENABLED = "true"
 
-# Import VS environment
-# As of VS 2019 16.2 there's a PowerShell module for developer VS prompt.
-# However, it is NOT compatible with PowerShell Core.
-# Instance ID can be found when locating the VS install information.
-# C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe -NoExit -Command "& { Import-Module .\Common7\Tools\vsdevshell\Microsoft.VisualStudio.DevShell.dll; Enter-VsDevShell -InstanceId 5a7ac072}"
-If (($isDesktop -or $IsWindows)) {
+# Update path settings for Windows-specific settings.
+If ($isDesktop -or $IsWindows) {
+    # Import VS environment
+    # As of VS 2019 16.2 there's a PowerShell module for developer VS prompt.
+    # However, it is NOT compatible with PowerShell Core.
+    # Instance ID can be found when locating the VS install information.
+    # C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe -NoExit -Command "& { Import-Module .\Common7\Tools\vsdevshell\Microsoft.VisualStudio.DevShell.dll; Enter-VsDevShell -InstanceId 5a7ac072}"
     Invoke-VisualStudioDevPrompt
+
+    # Put the user paths before the machine paths so dotnet install overrides are possible.
+    $combined = [System.Collections.ArrayList][System.Environment]::GetEnvironmentVariable("PATH").Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
+    $userSegments = [System.Environment]::GetEnvironmentVariable("PATH", "User").Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
+    $userSegments | ForEach-Object { $combined.Remove($_) }
+    $combined.InsertRange(0, $userSegments)
+    [System.Environment]::SetEnvironmentVariable("PATH", ($combined -join ";"))
 }
 
 # Fix double-wide XML icon in Terminal-Icons
