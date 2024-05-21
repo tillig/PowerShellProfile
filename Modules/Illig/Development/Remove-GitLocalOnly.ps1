@@ -47,7 +47,7 @@ function Remove-GitLocalOnly {
             $LocalOnlyBranches = $ToParse | ConvertFrom-Json | Where-Object { ($_.Remote.Length -eq 0) -or ($_.Track -eq "gone") } | Select-Object -ExpandProperty Name
             $LocalOnlyBranches | ForEach-Object {
                 $LocalBranch = $_
-                if ($pscmdlet.ShouldProcess("$LocalBranch", "Remove branch with no upstream")) {
+                if ($pscmdlet.ShouldProcess("$LocalBranch ($Path)", "Remove branch with no upstream")) {
                     &git branch -D $LocalBranch
                     If ($LASTEXITCODE -ne 0) {
                         throw "Unable to delete branch."

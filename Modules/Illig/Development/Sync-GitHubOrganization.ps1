@@ -50,13 +50,15 @@ function Sync-GitHubOrganization {
             Write-Error "Unable to find path $Path"
             Exit 1
         }
+
+        # Bug in ForEach/Parallel requires this to be set in addition to passing the -InformationAction.
+        # https://stackoverflow.com/questions/64436812/write-information-does-not-appear-to-work-in-powershell-foreach-object-parallel
+        $InformationPreference = 'Continue'
     }
     Process {
         # Not using Write-Progress because it makes it really hard to figure out where any failures happen.
         Try {
             Push-Location $Path
-            $currentFolders = Get-ChildItem -Directory -Force | Select-Object -ExpandProperty "Name"
-
             Write-Verbose "Querying $Organization..."
             $repos = @()
             $repoPage = $Null
@@ -70,18 +72,29 @@ function Sync-GitHubOrganization {
             )
 
             Write-Verbose "Found $($repos.Count) repositories."
-            $repos | Sort-Object -Property name | ForEach-Object {
+
+            $currentFolders = Get-ChildItem -Directory -Force | Select-Object -ExpandProperty "Name"
+
+            # Not using Update-GitRepsository because we need to separate the git pull from the removal of local branches.
+            Write-Verbose "Updating repository clones."
+            $repos | ForEach-Object -ThrottleLimit 10 -Parallel {
                 $repo = $_
                 $repoName = $repo.name
+                $currentFolders = $using:currentFolders
                 If ($currentFolders -contains $repoName) {
                     Write-Information -MessageData "Updating $repoName clone..." -InformationAction Continue
                     Try {
-                        If ($PSCmdlet.ShouldProcess($repoName, "Update existing clone")) {
-                            Update-GitRepository -Path $repoName
+                        Push-Location $repoName
+                        &git pull -p --recurse-submodules=yes --all -q
+                        If ($LASTEXITCODE -ne 0) {
+                            throw "Unable to update $Path from Git."
                         }
                     }
                     Catch {
-                        Write-Error $_
+                        Write-Error "Error processing $repoName`: $_"
+                    }
+                    Finally {
+                        Pop-Location
                     }
                 }
                 Else {
@@ -97,10 +110,18 @@ function Sync-GitHubOrganization {
                     If (-not $excluded) {
                         Write-Information -MessageData "Cloning $repoName..." -InformationAction Continue
                         $url = $repo.clone_url
-                        If ($PSCmdlet.ShouldProcess($repoName, "Create new clone")) {
-                            git clone --recurse-submodules -q $url
-                        }
+                        git clone --recurse-submodules -q $url
                     }
+                }
+            }
+
+            # Can't run this in parallel because you can't do PSCmdlet.ShouldProcess in a parallel loop.
+            Write-Verbose "Removing branches that are only local."
+            $repos | ForEach-Object {
+                $repo = $_
+                $repoName = $repo.name
+                If ($currentFolders -contains $repoName) {
+                    Remove-GitLocalOnly -Path $repoName
                 }
             }
 

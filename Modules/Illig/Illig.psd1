@@ -16,7 +16,7 @@
     Description       = 'Random commands for my PowerShell profile.'
 
     # Minimum version of the Windows PowerShell engine required by this module
-    PowerShellVersion = '5.0'
+    PowerShellVersion = '7.0'
 
     # Functions to export from this module
     FunctionsToExport = @(
