@@ -85,9 +85,10 @@ function Sync-GitHubOrganization {
                     Write-Information -MessageData "Updating $repoName clone..." -InformationAction Continue
                     Try {
                         Push-Location $repoName
+                        $path = (Get-Location).Path
                         &git pull -p --recurse-submodules=yes --all -q
                         If ($LASTEXITCODE -ne 0) {
-                            throw "Unable to update $Path from Git."
+                            throw "Unable to update $path from Git."
                         }
                     }
                     Catch {
