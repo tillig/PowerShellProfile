@@ -78,7 +78,7 @@ function Select-VsInstall {
     )
     Begin {
         $vsReleases = @("Microsoft.VisualStudio.Product.Enterprise", "Microsoft.VisualStudio.Product.Professional", "Microsoft.VisualStudio.Product.Community")
-        $vsInstalls = Get-VsSetupInstance -All -Prerelease:$Prerelease | Sort-Object -Property @{ Expression = { $_.Product.Version } } -Descending
+        $vsInstalls = Get-VsSetupInstance -All -Prerelease:$Prerelease -WarningAction SilentlyContinue | Sort-Object -Property @{ Expression = { $_.Product.Version } } -Descending
     }
     Process {
         $availableInstalls = $vsInstalls
