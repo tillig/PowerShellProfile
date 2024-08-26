@@ -33,6 +33,7 @@
         'Invoke-WindowsBatchFile',
         'New-MachineKey',
         'Open-GitRemote',
+        'Optimize-PSReadlineHistory',
         'Remove-GitLocalOnly',
         'Remove-KubectlContext',
         'Remove-TempFiles',
