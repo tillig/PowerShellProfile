@@ -2,131 +2,132 @@
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
   "blocks": [
     {
+      "type": "prompt",
       "alignment": "left",
       "segments": [
         {
-          "background": "#000000",
-          "foreground": "#ff0000",
-          "powerline_symbol": "",
           "properties": {
             "always_enabled": false
           },
           "style": "powerline",
-          "template": "[⌧ {{ if gt .Code 0 }} {{ .Meaning }}{{ else }}{{ end }}]",
+          "template": "[\u2327 {{ if gt .Code 0 }}\uf00d {{ .Meaning }}{{ else }}\uf42e{{ end }}]",
+          "foreground": "#ff0000",
+          "powerline_symbol": "\ue0b0",
+          "background": "#000000",
           "type": "status"
         },
         {
-          "background": "#ff0000",
-          "foreground": "#000000",
-          "powerline_symbol": "",
           "properties": {
             "root_icon": "☠"
           },
           "style": "powerline",
-          "template": "  ",
+          "template": " \uf0e7 ",
+          "foreground": "#000000",
+          "powerline_symbol": "\ue0b0",
+          "background": "#ff0000",
           "type": "root"
         },
         {
-          "background": "#1f1f1f",
-          "foreground": "#ffffff",
-          "powerline_symbol": "",
           "style": "powerline",
-          "template": " {{ if .SSHSession }}󰌘 {{ end }}{{ .UserName }}@{{ .HostName }} ",
+          "template": " {{ if .SSHSession }}\udb80\udf18 {{ end }}{{ .UserName }}@{{ .HostName }} ",
+          "foreground": "#ffffff",
+          "powerline_symbol": "\ue0b0",
+          "background": "#1f1f1f",
           "type": "session"
         },
         {
-          "background": "#0000c0",
-          "foreground": "#ffffff",
-          "powerline_symbol": "",
           "properties": {
             "style": "short"
           },
           "style": "powerline",
-          "template": " 󰉋 {{ .Path }} ",
+          "template": " \udb80\ude4b {{ .Path }} ",
+          "foreground": "#ffffff",
+          "powerline_symbol": "\ue0b0",
+          "background": "#0000c0",
           "type": "path"
         },
         {
+          "style": "powerline",
+          "template": "{{ if .Env.LOCATION_STACK_DEPTH }} \ue705 {{ .Env.LOCATION_STACK_DEPTH }} {{ end }}",
+          "foreground": "#ffffff",
+          "powerline_symbol": "\ue0b0",
           "background": "#0077c2",
-          "foreground": "#ffffff",
-          "powerline_symbol": "",
-          "style": "powerline",
-          "template": "{{ if .Env.LOCATION_STACK_DEPTH }}  {{ .Env.LOCATION_STACK_DEPTH }} {{ end }}",
           "type": "text"
         },
         {
+          "style": "powerline",
+          "template": "{{ if .Env.VSPROMPTVERSION }} \u2302 vs{{ .Env.VSPROMPTVERSION }} {{ end }}",
+          "foreground": "#ffffff",
+          "powerline_symbol": "\ue0b0",
           "background": "#720dcf",
-          "foreground": "#ffffff",
-          "powerline_symbol": "",
-          "style": "powerline",
-          "template": "{{ if .Env.VSPROMPTVERSION }} ⌂ vs{{ .Env.VSPROMPTVERSION }} {{ end }}",
           "type": "text"
         },
         {
-          "background": "#00ffff",
-          "foreground": "#000000",
-          "powerline_symbol": "",
           "properties": {
             "display_mode": "always",
             "home_enabled": true
           },
           "style": "powerline",
-          "template": "  {{ if .Unsupported }}{{ else }}{{ .Full }}{{ end }} ",
+          "template": " \ue77f {{ if .Unsupported }}\uf071{{ else }}{{ .Full }}{{ end }} ",
+          "foreground": "#000000",
+          "powerline_symbol": "\ue0b0",
+          "background": "#00ffff",
           "type": "dotnet"
         },
         {
-          "background": "#ebcc34",
-          "foreground": "#000000",
-          "powerline_symbol": "",
           "style": "powerline",
-          "template": " ⎈ {{ replaceP \"([a-f0-9]{2})[a-f0-9]{6}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{10}([a-f0-9]{2})\" .Context \"$1..$2\" }}{{ if .Namespace }} :: {{ .Namespace }}{{ end }} ",
+          "template": " \u2388 {{ replaceP \"([a-f0-9]{2})[a-f0-9]{6}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{10}([a-f0-9]{2})\" .Context \"$1..$2\" }}{{ if .Namespace }} :: {{ .Namespace }}{{ end }} ",
+          "foreground": "#000000",
+          "powerline_symbol": "\ue0b0",
+          "background": "#ebcc34",
           "type": "kubectl"
         },
         {
-          "background": "#3493eb",
-          "foreground": "#000000",
-          "powerline_symbol": "",
           "style": "powerline",
-          "template": " 󰠅 {{ .Name }} ",
+          "template": " \udb82\udc05 {{ .Name }} ",
+          "foreground": "#000000",
+          "powerline_symbol": "\ue0b0",
+          "background": "#3493eb",
           "type": "az"
         },
         {
-          "background": "#571486",
-          "foreground": "#ffffff",
-          "powerline_symbol": "",
           "style": "powerline",
-          "type": "gcp",
-          "template": " {{.Account}}"
+          "template": "\ue7b2 {{.Account}}",
+          "foreground": "#ffffff",
+          "powerline_symbol": "\ue0b0",
+          "background": "#571486",
+          "type": "gcp"
         },
         {
-          "background": "#00cc00",
-          "foreground": "#000000",
-          "powerline_symbol": "",
           "properties": {
             "fetch_status": true
           },
           "style": "powerline",
-          "template": " {{.Env.PRE_COMMIT_INSTALLED}}{{ .HEAD }} {{ .BranchStatus }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}} 󰆓 {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}}  {{ .WorktreeCount }}{{ end }} ",
+          "template": " {{.Env.PRE_COMMIT_INSTALLED}}{{ .HEAD }} {{ .BranchStatus }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}} \udb80\udd93 {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}} \uf1bb {{ .WorktreeCount }}{{ end }} ",
+          "foreground": "#000000",
+          "powerline_symbol": "\ue0b0",
+          "background": "#00cc00",
           "type": "git"
         }
-      ],
-      "type": "prompt"
+      ]
     },
     {
+      "type": "prompt",
       "alignment": "right",
       "segments": [
         {
-          "foreground": "#ffffff",
           "properties": {
             "time_format": "15:04"
           },
           "style": "plain",
           "template": "[{{ .CurrentDate | date .Format }}]",
+          "foreground": "#ffffff",
           "type": "time"
         }
-      ],
-      "type": "prompt"
+      ]
     },
     {
+      "type": "prompt",
       "alignment": "left",
       "segments": [
         {
@@ -134,10 +135,9 @@
           "template": " {{ .Name }}>",
           "type": "shell"
         }
-      ],
-      "type": "prompt"
+      ]
     }
   ],
-  "final_space": true,
-  "version": 2
+  "version": 3,
+  "final_space": true
 }
