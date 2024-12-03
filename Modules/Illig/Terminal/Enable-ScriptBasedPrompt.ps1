@@ -219,11 +219,9 @@ function Enable-ScriptBasedPrompt {
                 }
             }
 
-            # Newline with a no-break space (U+00A0) - the nbsp stops a host bug where resizing
-            # the window causes the last item on the status line to stretch all the way to
-            # the edge. Regular space won't fix it.
-            Write-Host ' '
-
+            # Clear the line after the prompt to avoid the background being printed on the next line when at the end of the buffer.
+            # See https://github.com/JanDeDobbeleer/oh-my-posh/issues/65
+            Write-Host "`e[K`e[0J"
 
             if ($isAdmin) { $color = 'Red'; }
             else { $color = 'Green'; }
