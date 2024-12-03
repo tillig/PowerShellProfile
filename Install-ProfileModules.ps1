@@ -1,5 +1,6 @@
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 $releaseModules = @(
+    "posh-git",
     "PSBashCompletions",
     "VSSetup",
     "PSScriptAnalyzer",
