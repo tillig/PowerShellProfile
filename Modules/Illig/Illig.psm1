@@ -22,6 +22,7 @@
 . $PSScriptRoot\Kubernetes\Get-KubectlShell.ps1
 . $PSScriptRoot\Kubernetes\Remove-KubectlContext.ps1
 . $PSScriptRoot\Terminal\AliasFunctions.ps1
+. $PSScriptRoot\Terminal\Enable-ScriptBasedPrompt.ps1
 . $PSScriptRoot\Terminal\Optimize-PSReadlineHistory.ps1
 . $PSScriptRoot\Terminal\Set-ConsoleEncoding.ps1
 . $PSScriptRoot\Terminal\Test-AnsiSupport.ps1

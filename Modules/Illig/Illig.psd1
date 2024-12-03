@@ -23,6 +23,7 @@
         'AliasFunctionDir',
         'Copy-ContainerImage',
         'Enable-Ruby',
+        'Enable-ScriptBasedPrompt',
         'Export-PostmanItem',
         'Get-GitBranchReport',
         'Get-KubectlAll',
