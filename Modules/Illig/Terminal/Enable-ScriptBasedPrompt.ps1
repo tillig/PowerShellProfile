@@ -119,12 +119,11 @@ function Enable-ScriptBasedPrompt {
             $currentPath = $global:GitPromptSettings.DefaultPromptPath.Expand().Text
             Write-Host " 󰉋 $currentPath " -NoNewline -BackgroundColor DarkBlue -ForegroundColor White
 
-            # Write one + for each level of the pushd stack.
-            $locationStackCount = (Get-Location -Stack).Count
-            if ($locationStackCount) {
-                Write-Host "  $locationStackCount " -NoNewline -BackgroundColor Blue -ForegroundColor White
-            }
-
+            # Inside the prompt function the current location stack count is
+            # always zero. Skipping that segment for now; may need to see how
+            # oh-my-posh-2 did it. Looks like some indirection.
+            # https://github.com/JanDeDobbeleer/oh-my-posh2/blob/c4919171881e8384a0af4aa5dec26d3ad0ea5f88/oh-my-posh.psm1#L26
+            #
             # Write any custom prompt environment.
             # $global:PromptEnvironment = " ⌂ vs2017 "
             # DarkMagenta is, by default, "transparent" to Windows, so use DarkGray.
