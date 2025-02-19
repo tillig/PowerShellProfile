@@ -97,9 +97,9 @@ function Open-GitRemote {
 
                 # Convert SSH to HTTPS URLs
                 If ($GitInfo.Domain -match "^(ssh|vs-ssh)\.") {
-                    # git@ssh.dev.azure.com:v3/F-DC/Digital%20Nexus/banking-core-specification
+                    # git@ssh.dev.azure.com:v3/OrgName/ProjectName/repo-name
                     # will have been converted to
-                    # https://ssh.dev.azure.com/v3/F-DC/Digital%20Nexus/banking-core-specification
+                    # https://ssh.dev.azure.com/v3/OrgName/ProjectName/repo-name
                     # so remove the `ssh.` on the host and the `v3` in the path.
                     $GitInfo.Domain = $GitInfo.Domain -replace "^(ssh|vs-ssh)\.", ''
                     $GitInfo.Path = $GitInfo.Path -replace "^\/?v\d\/", ''
@@ -279,7 +279,7 @@ function Open-GitRemote {
             }
 
             # SSH URLs come through like
-            # git@ssh.dev.azure.com:v3/F-DC/Digital%20Nexus/banking-core-specification
+            # git@ssh.dev.azure.com:v3/OrgName/ProjectName/repo-name
             # or git@github.com:autofac/Autofac.git.
             # This parses into domain/host and path so we can calculate from that.
             # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/parsers/remoteParser.ts
