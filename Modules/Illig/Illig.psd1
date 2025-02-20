@@ -25,6 +25,7 @@
         'Enable-Ruby',
         'Enable-ScriptBasedPrompt',
         'Export-PostmanItem',
+        'Get-AzureDevOpsBuild',
         'Get-GitBranchReport',
         'Get-KubectlAll',
         'Get-KubectlShell',
@@ -51,14 +52,9 @@
         'Update-GitRepository'
     )
 
-    # Cmdlets to export from this module
-    CmdletsToExport   = @()
-
-    # Variables to export from this module
-    VariablesToExport = @()
-
-    # Aliases to export from this module
-    AliasesToExport   = @()
+    # Custom type formats
+    FormatsToProcess  = @(
+    )
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules = @('VSSetup')

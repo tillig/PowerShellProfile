@@ -1,6 +1,8 @@
-﻿. $PSScriptRoot\Development\Copy-ContainerImage.ps1
+﻿. $PSScriptRoot\Types\Types.ps1
+. $PSScriptRoot\Development\Copy-ContainerImage.ps1
 . $PSScriptRoot\Development\Enable-Ruby.ps1
 . $PSScriptRoot\Development\Export-PostmanItem.ps1
+. $PSScriptRoot\Development\Get-AzureDevOpsBuild.ps1
 . $PSScriptRoot\Development\Get-GitBranchReport.ps1
 . $PSScriptRoot\Development\Get-Ruby.ps1
 . $PSScriptRoot\Development\Import-PostmanItem.ps1
