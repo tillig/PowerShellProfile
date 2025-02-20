@@ -7,7 +7,7 @@ class AzureDevOpsPipelineStep {
     [string] $Name
     [string] $State
     [string] $Result
-    [DateTime] $StartTime
+    [Nullable[DateTime]] $StartTime
     [int] $Order
     [int] $Errors
     [int] $Warnings
@@ -22,5 +22,6 @@ class AzureDevOpsPipelineRun {
     [string] $Name
     [string] $State
     [string] $Result
+    [DateTime] $ReportTime
     [AzureDevOpsPipelineStep[]] $Timeline
 }
