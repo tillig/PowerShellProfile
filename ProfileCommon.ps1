@@ -95,6 +95,34 @@ if ($?) {
     }
 }
 
+# az CLI
+# https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli&pivots=winget#enable-tab-completion-in-powershell
+Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
+    param($commandName, $wordToComplete, $cursorPosition)
+    $completion_file = New-TemporaryFile
+    $env:ARGCOMPLETE_USE_TEMPFILES = 1
+    $env:_ARGCOMPLETE_STDOUT_FILENAME = $completion_file
+    $env:COMP_LINE = $wordToComplete
+    $env:COMP_POINT = $cursorPosition
+    $env:_ARGCOMPLETE = 1
+    $env:_ARGCOMPLETE_SUPPRESS_SPACE = 0
+    $env:_ARGCOMPLETE_IFS = "`n"
+    $env:_ARGCOMPLETE_SHELL = 'powershell'
+    az 2>&1 | Out-Null
+    Get-Content $completion_file | Sort-Object | ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
+    Remove-Item $completion_file, Env:\_ARGCOMPLETE_STDOUT_FILENAME, Env:\ARGCOMPLETE_USE_TEMPFILES, Env:\COMP_LINE, Env:\COMP_POINT, Env:\_ARGCOMPLETE, Env:\_ARGCOMPLETE_SUPPRESS_SPACE, Env:\_ARGCOMPLETE_IFS, Env:\_ARGCOMPLETE_SHELL
+}
+
+# For commands installed by Homebrew that also generate Powershell completions, register those.
+# https://docs.brew.sh/Shell-Completion
+if ((Get-Command brew) -and (Test-Path ($completions = "$(brew --prefix)/share/pwsh/completions"))) {
+    foreach ($f in Get-ChildItem -Path $completions -File) {
+        . $f
+    }
+}
+
 # Bash completions in PowerShell
 $enableBashCompletions = ($Null -ne (Get-Command bash -ErrorAction Ignore)) -or ($Null -ne (Get-Command git -ErrorAction Ignore))
 if ($enableBashCompletions) {

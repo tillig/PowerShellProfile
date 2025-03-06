@@ -1,5 +1,4 @@
-bash_completions/*.sh text eol=lf working-tree-encoding=ASCII
-*.ps1                 text
-*.psd1                text
-*.psm1                text
-
+bash_completions/* text eol=lf working-tree-encoding=ASCII
+*.ps1              text
+*.psd1             text
+*.psm1             text
