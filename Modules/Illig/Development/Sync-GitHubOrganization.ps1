@@ -122,7 +122,12 @@ function Sync-GitHubOrganization {
                 $repo = $_
                 $repoName = $repo.name
                 If ($currentFolders -contains $repoName) {
-                    Remove-GitLocalOnly -Path $repoName
+                    Try {
+                        Remove-GitLocalOnly -Path $repoName
+                    }
+                    Catch {
+                        Write-Error "Error processing $repoName`: $_"
+                    }
                 }
             }
 
