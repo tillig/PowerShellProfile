@@ -41,7 +41,6 @@ function Get-KubectlAll {
         $kubectl = $kubectl.Source
     }
     Process {
-        Write-Progress -Activity "Getting resources" -PercentComplete 0
         $kubectlParams = @('api-resources', '-o', 'name')
         if ([String]::IsNullOrEmpty($Namespace)) {
             $kubectlParams += '--namespaced=false'
@@ -54,8 +53,7 @@ function Get-KubectlAll {
             $kubectlParams += "--context=$Context"
         }
 
-        Write-Progress -Activity "Getting resources..."
-        Write-Progress -Activity "Getting resources..." -CurrentOperation "Retrieving resource IDs from Kubernetes..." -PercentComplete 5
+        Write-Verbose 'Retrieving resource IDs from Kubernetes.'
         $allResources = &"$kubectl" @kubectlParams 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Error "Unable to retrieve resources from Kubernetes. Please check your kubectl configuration."
@@ -72,7 +70,7 @@ function Get-KubectlAll {
         $resourceList = [String]::Join(',', $filteredResources)
 
         Write-Verbose "Resource list: $resourceList"
-        Write-Progress -Activity "Getting resources..." -CurrentOperation "Retrieving resources from Kubernetes..." -PercentComplete 50
+        Write-Verbose 'Retrieving resources from Kubernetes.'
 
         # Redirect the stderr to stdout so everything shows up correctly rather than overlapping.
         # The Write-Progress moving the cursor around really messes things up. :(
@@ -88,7 +86,6 @@ function Get-KubectlAll {
         }
 
         &"$kubectl" @kubectlParams 2>&1
-        Write-Progress -Activity "Getting resources..." -Completed
         $results
     }
 }
