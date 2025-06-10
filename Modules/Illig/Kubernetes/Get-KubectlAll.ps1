@@ -1,12 +1,18 @@
 <#
-.Synopsis
-   Gets all the entities from a Kubernetes namespace; or, alternatively, the set of all non-namespaced items.
+.SYNOPSIS
+   Gets all the entities from a Kubernetes namespace; or, alternatively, the set
+   of all non-namespaced items.
 .PARAMETER Namespace
-   The namespace from which entities should be retrieved. Omit this parameter to retrieve non-namespaced items.
+   The namespace from which entities should be retrieved. Omit this parameter to
+   retrieve non-namespaced items.
+.PARAMETER Context
+    The Kubernetes context to use. If not specified, the current context will be
+    used.
 .DESCRIPTION
-   Gets a list of all the API resources available in the Kubernetes cluster that are namespaced (or non-namespaced,
-   as the case may be.) Once that list has been retrieved, removes the 'events' objects if there are any (these get
-   too long and numerous to be valuable), then gets everything as requested.
+   Gets a list of all the API resources available in the Kubernetes cluster that
+   are namespaced (or non-namespaced, as the case may be.) Once that list has
+   been retrieved, removes the 'events' objects if there are any (these get too
+   long and numerous to be valuable), then gets everything as requested.
 
    This can be a lot of data, so it make take a few seconds. Stick with it.
 .EXAMPLE
@@ -20,7 +26,10 @@ function Get-KubectlAll {
     Param
     (
         [Parameter(ValueFromPipeline = $True, Position = 0)]
-        [string]$Namespace
+        [string]$Namespace,
+
+        [Parameter(ValueFromPipeline = $True)]
+        [string]$Context
     )
     Begin {
         $kubectl = Get-Command kubectl -ErrorAction Ignore
@@ -33,16 +42,27 @@ function Get-KubectlAll {
     }
     Process {
         Write-Progress -Activity "Getting resources" -PercentComplete 0
+        $kubectlParams = @('api-resources', '-o', 'name')
         if ([String]::IsNullOrEmpty($Namespace)) {
-            $namespaced = "--namespaced=false"
+            $kubectlParams += '--namespaced=false'
         }
         else {
-            $namespaced = "--namespaced=true"
+            $kubectlParams += '--namespaced=true'
+        }
+
+        if (-not [String]::IsNullOrEmpty($Context)) {
+            $kubectlParams += "--context=$Context"
         }
 
         Write-Progress -Activity "Getting resources..."
         Write-Progress -Activity "Getting resources..." -CurrentOperation "Retrieving resource IDs from Kubernetes..." -PercentComplete 5
-        $allResources = &"$kubectl" api-resources -o name $namespaced
+        $allResources = &"$kubectl" @kubectlParams 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Unable to retrieve resources from Kubernetes. Please check your kubectl configuration."
+            Write-Error $allResources
+            Exit 1
+        }
+
         $filteredResources = $allResources | Where-Object {
             # No events, too noisy
             (-not ($_ -match 'events')) -and
@@ -56,12 +76,18 @@ function Get-KubectlAll {
 
         # Redirect the stderr to stdout so everything shows up correctly rather than overlapping.
         # The Write-Progress moving the cursor around really messes things up. :(
-        if ([String]::IsNullOrEmpty($Namespace)) {
-            $results = (&kubectl get $resourceList 2>&1)
+        $kubectlParams = @('get', $resourceList)
+
+        if (-not [String]::IsNullOrEmpty($Namespace)) {
+            $kubectlParams += '-n'
+            $kubectlParams += $Namespace
         }
-        else {
-            $results = (&kubectl get $resourceList -n $Namespace 2>&1)
+
+        if (-not [String]::IsNullOrEmpty($Context)) {
+            $kubectlParams += "--context=$Context"
         }
+
+        &"$kubectl" @kubectlParams 2>&1
         Write-Progress -Activity "Getting resources..." -Completed
         $results
     }
