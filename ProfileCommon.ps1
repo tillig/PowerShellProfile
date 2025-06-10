@@ -117,7 +117,7 @@ Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
 
 # For commands installed by Homebrew that also generate Powershell completions, register those.
 # https://docs.brew.sh/Shell-Completion
-if ((Get-Command brew) -and (Test-Path ($completions = "$(brew --prefix)/share/pwsh/completions"))) {
+if ((Get-Command brew -ErrorAction Ignore) -and (Test-Path ($completions = "$(brew --prefix)/share/pwsh/completions"))) {
     foreach ($f in Get-ChildItem -Path $completions -File) {
         . $f
     }
