@@ -1,5 +1,5 @@
-Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 $releaseModules = @(
+    "Microsoft.Graph",
     "posh-git",
     "PSBashCompletions",
     "VSSetup",
