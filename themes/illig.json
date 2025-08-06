@@ -94,7 +94,7 @@
           "foreground": "#ffffff",
           "powerline_symbol": "",
           "style": "powerline",
-          "template": " {{.Account}}",
+          "template": " {{ replaceP \"(.*).iam.gserviceaccount.com\" .Account \"$1\" }}",
           "type": "gcp"
         },
         {
