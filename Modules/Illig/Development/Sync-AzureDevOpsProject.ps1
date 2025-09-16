@@ -44,7 +44,7 @@ function Sync-AzureDevOpsProject {
 
         [Parameter(Mandatory = $False)]
         [string[]]
-        $Exclude = @()
+        $Exclude
     )
     Begin {
         $git = Get-Command git -ErrorAction Ignore
@@ -72,6 +72,10 @@ function Sync-AzureDevOpsProject {
         # Not using Write-Progress because it makes it really hard to figure out where any failures happen.
         Try {
             Push-Location $Path
+            If ($Exclude) {
+                Write-Verbose "Excluding repos matching:"
+                $Exclude | ForEach-Object { Write-Verbose "- $_" }
+            }
 
             Write-Verbose "Querying $Organization/$Project..."
             $repos = az repos list --org $Organization -p $Project | ConvertFrom-Json -Depth 100 -NoEnumerate
@@ -83,12 +87,14 @@ function Sync-AzureDevOpsProject {
 
             $currentFolders = Get-ChildItem -Directory -Force | Select-Object -ExpandProperty "Name"
 
-            # Not using Update-GitRepsository because we need to separate the git pull from the removal of local branches.
+            # Not using Update-GitRepository because we need to separate the git pull from the removal of local branches.
             Write-Verbose "Updating repository clones."
             $repos | ForEach-Object -ThrottleLimit 10 -Parallel {
                 $repo = $_
                 $repoName = $repo.name
                 $currentFolders = $using:currentFolders
+                $Exclude = $using:Exclude
+                $VPref = $using:VerbosePreference
                 If ($currentFolders -contains $repoName) {
                     Write-Information -MessageData "Updating $repoName clone..." -InformationAction Continue
                     Try {
@@ -108,11 +114,15 @@ function Sync-AzureDevOpsProject {
                 }
                 Else {
                     $excluded = $False
-                    If ($null -ne $Exclude) {
+                    If ($Exclude) {
+                        Write-Verbose "Checking exclusions for $repoName" -Verbose:$VPref
                         $Exclude | ForEach-Object {
                             If ($repoName -match $_) {
                                 Write-Information -MessageData "Excluding repo $repoName based on exclusion '$_'." -InformationAction Continue
                                 $excluded = $True
+                            }
+                            Else {
+                                Write-Verbose "$repoName does not match exclusion '$_'." -Verbose:$VPref
                             }
                         }
                     }
