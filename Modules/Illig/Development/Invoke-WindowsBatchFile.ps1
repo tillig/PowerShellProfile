@@ -48,12 +48,12 @@ function Invoke-WindowsBatchFile {
 
     ## Go through the environment variables in the temp file.
     ## For each of them, set the variable in our local environment.
-    $verboseOutput = "Output:"
-    If($Silent) {
-        $verboseOutput = "[Silenced] " + $verboseOutput
+    $verboseOutput = 'Output:'
+    if ($Silent) {
+        $verboseOutput = '[Silenced] ' + $verboseOutput
     }
-    Get-Content $tempFile | Foreach-Object {
-        if ($_ -match "^(.*?)=(.*)$") {
+    Get-Content $tempFile | ForEach-Object {
+        if ($_ -match '^(.*?)=(.*)$') {
             Set-Content "env:\$($matches[1])" $matches[2]
             Write-Verbose "Environment variable: $($matches[1]) = $($matches[2])"
         }

@@ -18,9 +18,9 @@
 .EXAMPLE
     Enable-Ruby 3.1 -Verbose
 #>
-Function Enable-Ruby {
+function Enable-Ruby {
     [CmdletBinding(SupportsShouldProcess = $False)]
-    Param(
+    param(
         [Parameter(Mandatory = $True, Position = 1)]
         [string]
         $Version,
@@ -30,48 +30,48 @@ Function Enable-Ruby {
         $RubyOpt
     )
 
-    Begin {
+    begin {
         $rubies = Get-Ruby
-        $pathSeparator = ":";
+        $pathSeparator = ':'
         if ($IsWindows) {
-            $pathSeparator = ";";
+            $pathSeparator = ';'
         }
     }
 
-    Process {
+    process {
         # Locate Ruby version - exact match first.
         $match = $rubies | Where-Object { $_.Version -eq $Version } | Select-Object -First 1
-        If (-not $match) {
+        if (-not $match) {
             # Substring match if no exact match.
             $match = $rubies | Where-Object { $_.Version -like "*$Version*" } | Select-Object -First 1
-            If (-not $match) {
+            if (-not $match) {
                 throw "Unknown Ruby: $Version"
             }
         }
 
-        $binPath = Join-Path $match.Location.FullName "bin"
-        $exePath = Join-Path $binPath "ruby"
-        If (-not (Test-Path $exePath -PathType Leaf)) {
+        $binPath = Join-Path $match.Location.FullName 'bin'
+        $exePath = Join-Path $binPath 'ruby'
+        if (-not (Test-Path $exePath -PathType Leaf)) {
             throw "$exePath is not a Ruby executable"
         }
 
-        If ($Env:RUBY_ROOT) {
+        if ($Env:RUBY_ROOT) {
             Reset-Ruby -Verbose:$VerbosePreference
         }
 
         Write-Verbose "Setting RUBY_ROOT to $($match.Location.FullName)"
-        [Environment]::SetEnvironmentVariable("RUBY_ROOT", $match.Location.FullName)
-        If ($RubyOpt) {
+        [Environment]::SetEnvironmentVariable('RUBY_ROOT', $match.Location.FullName)
+        if ($RubyOpt) {
             Write-Verbose "Setting RUBYOPT to $RubyOpt"
-            [Environment]::SetEnvironmentVariable("RUBYOPT", $RubyOpt)
+            [Environment]::SetEnvironmentVariable('RUBYOPT', $RubyOpt)
         }
 
         $newPath = "$binPath$pathSeparator$($Env:PATH)"
         Write-Verbose "Setting PATH to $newPath"
-        [Environment]::SetEnvironmentVariable("PATH", $newPath)
+        [Environment]::SetEnvironmentVariable('PATH', $newPath)
 
-        If (-not (Test-Administrator)) {
-            $script = @"
+        if (-not (Test-Administrator)) {
+            $script = @'
 puts "{"
 puts "\"ruby_engine\":\"#{defined?(RUBY_ENGINE) ? RUBY_ENGINE : 'ruby'}\","
 puts "\"ruby_version\":\"#{RUBY_VERSION}\","
@@ -83,34 +83,34 @@ begin
         puts "\"\""
 end
 puts "}"
-"@
+'@
             $rubyInfo = ($script | & $exePath) | ConvertFrom-Json
 
-            $gemHome = Join-Path $Env:HOME ".gem" $rubyInfo.ruby_engine $rubyInfo.ruby_version
+            $gemHome = Join-Path $Env:HOME '.gem' $rubyInfo.ruby_engine $rubyInfo.ruby_version
             Write-Verbose "Setting GEM_HOME to $gemHome"
-            [Environment]::SetEnvironmentVariable("GEM_HOME", $gemHome)
+            [Environment]::SetEnvironmentVariable('GEM_HOME', $gemHome)
 
             $gemPath = $gemHome
-            If ($rubyInfo.gem_root) {
+            if ($rubyInfo.gem_root) {
                 Write-Verbose "Setting GEM_ROOT to $($rubyInfo.gem_root)"
-                [Environment]::SetEnvironmentVariable("GEM_ROOT", $rubyInfo.gem_root)
+                [Environment]::SetEnvironmentVariable('GEM_ROOT', $rubyInfo.gem_root)
                 $gemPath = "$gemPath$pathSeparator$($rubyInfo.gem_root)"
             }
-            If ($Env:GEM_PATH) {
+            if ($Env:GEM_PATH) {
                 $gemPath = "$gemPath$pathSeparator$($Env:GEM_PATH)"
             }
             Write-Verbose "Setting GEM_PATH to $gemPath"
-            [Environment]::SetEnvironmentVariable("GEM_PATH", $gemPath)
+            [Environment]::SetEnvironmentVariable('GEM_PATH', $gemPath)
 
             $newPath = $Env:PATH
-            If ($rubyInfo.gem_root) {
-                $gemRootBin = Join-Path $rubyInfo.gem_root "bin"
+            if ($rubyInfo.gem_root) {
+                $gemRootBin = Join-Path $rubyInfo.gem_root 'bin'
                 $newPath = "$gemRootBin$pathSeparator$newPath"
             }
-            $gemHomeBin = Join-Path $gemHome "bin"
+            $gemHomeBin = Join-Path $gemHome 'bin'
             $newPath = "$gemHomeBin$pathSeparator$newPath"
             Write-Verbose "Setting PATH to $newPath"
-            [Environment]::SetEnvironmentVariable("PATH", $newPath)
+            [Environment]::SetEnvironmentVariable('PATH', $newPath)
         }
     }
 }

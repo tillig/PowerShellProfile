@@ -13,16 +13,16 @@
 #>
 function Invoke-VisualStudioDevPrompt {
     [CmdletBinding()]
-    Param
+    param
     (
     )
-    Begin {
-        $fallbackReleases = @("2015", "2013", "2012", "2010")
+    begin {
+        $fallbackReleases = @('2015', '2013', '2012', '2010')
     }
-    Process {
+    process {
         $origErrorAction = $ErrorActionPreference
         try {
-            $ErrorActionPreference = "SilentlyContinue"
+            $ErrorActionPreference = 'SilentlyContinue'
 
             if ($NULL -eq $env:VSPREFERRED -or (-not $fallbackReleases.Contains($env:VSPREFERRED))) {
                 $vs = Select-VsInstall -Year "$($env:VSPREFERRED)"
@@ -42,14 +42,14 @@ function Invoke-VisualStudioDevPrompt {
                         Write-Verbose "Attempting VS $rel load..."
                         Import-VisualStudioVars $rel
                         $env:VSPROMPTVERSION = "$rel"
-                        break;
+                        break
                     }
                     catch { }
                 }
             }
         }
         catch [Exception] {
-            Write-Warning "Unable to initialize VS command settings."
+            Write-Warning 'Unable to initialize VS command settings.'
         }
         finally {
             $ErrorActionPreference = $origErrorAction
@@ -71,16 +71,16 @@ function Invoke-VisualStudioDevPrompt {
 #>
 function Select-VsInstall {
     [CmdletBinding()]
-    Param
+    param
     (
         [string] $Year,
         [switch] $Prerelease
     )
-    Begin {
-        $vsReleases = @("Microsoft.VisualStudio.Product.Enterprise", "Microsoft.VisualStudio.Product.Professional", "Microsoft.VisualStudio.Product.Community")
-        $vsInstalls = Get-VsSetupInstance -All -Prerelease:$Prerelease -WarningAction SilentlyContinue | Sort-Object -Property @{ Expression = { $_.Product.Version } } -Descending
+    begin {
+        $vsReleases = @('Microsoft.VisualStudio.Product.Enterprise', 'Microsoft.VisualStudio.Product.Professional', 'Microsoft.VisualStudio.Product.Community')
+        $vsInstalls = Get-VSSetupInstance -All -Prerelease:$Prerelease -WarningAction SilentlyContinue | Sort-Object -Property @{ Expression = { $_.Product.Version } } -Descending
     }
-    Process {
+    process {
         $availableInstalls = $vsInstalls
         if (-not [System.String]::IsNullOrEmpty($Year)) {
             Write-Verbose "Filtering list of VS installs by year [$Year]."
@@ -94,7 +94,7 @@ function Select-VsInstall {
             }
         }
 
-        Write-Verbose "No matching VS installs selected."
+        Write-Verbose 'No matching VS installs selected.'
         return $NULL
     }
 }

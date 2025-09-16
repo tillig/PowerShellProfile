@@ -18,29 +18,31 @@
 .EXAMPLE
    Get-KubectlAll
 .EXAMPLE
-   Get-KubectlAll mynamespace
+   Get-KubectlAll my-namespace
 #>
 function Get-KubectlAll {
     [CmdletBinding()]
     [OutputType([String])]
-    Param
+    param
     (
         [Parameter(ValueFromPipeline = $True, Position = 0)]
-        [string]$Namespace,
+        [string]
+        $Namespace,
 
         [Parameter(ValueFromPipeline = $True)]
-        [string]$Context
+        [string]
+        $Context
     )
-    Begin {
+    begin {
         $kubectl = Get-Command kubectl -ErrorAction Ignore
         if ($Null -eq $kubectl) {
-            Write-Error "Unable to locate kubectl."
-            Exit 1
+            Write-Error 'Unable to locate kubectl.'
+            exit 1
         }
 
         $kubectl = $kubectl.Source
     }
-    Process {
+    process {
         $kubectlParams = @('api-resources', '-o', 'name')
         if ([String]::IsNullOrEmpty($Namespace)) {
             $kubectlParams += '--namespaced=false'
@@ -56,9 +58,9 @@ function Get-KubectlAll {
         Write-Verbose 'Retrieving resource IDs from Kubernetes.'
         $allResources = &"$kubectl" @kubectlParams 2>&1
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Unable to retrieve resources from Kubernetes. Please check your kubectl configuration."
+            Write-Error 'Unable to retrieve resources from Kubernetes. Please check your kubectl configuration.'
             Write-Error $allResources
-            Exit 1
+            exit 1
         }
 
         $filteredResources = $allResources | Where-Object {

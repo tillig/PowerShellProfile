@@ -14,7 +14,7 @@
 #>
 function Update-GitRepository {
     [CmdletBinding(SupportsShouldProcess = $False)]
-    Param(
+    param(
         [Parameter(Mandatory = $False,
             Position = 0,
             ValueFromPipeline = $True)]
@@ -22,35 +22,34 @@ function Update-GitRepository {
         [ValidateNotNullOrEmpty()]
         $Path = $PWD
     )
-    Begin {
+    begin {
         $git = Get-Command git -ErrorAction Ignore
         if ($Null -eq $git) {
-            Write-Error "Unable to locate git."
-            Exit 1
+            Write-Error 'Unable to locate git.'
+            exit 1
         }
 
-        Write-Progress -Activity "Updating Git repositories" -Status "Starting..."
+        Write-Progress -Activity 'Updating Git repositories' -Status 'Starting...'
     }
-    Process {
-        If (-not (Test-Path $Path)) {
+    process {
+        if (-not (Test-Path $Path)) {
             throw "Unable to find path $Path"
         }
-        Try {
-            Write-Progress -Activity "Updating Git repositories" -Status $Path
+        try {
+            Write-Progress -Activity 'Updating Git repositories' -Status $Path
             Push-Location $Path
             &git pull -p --recurse-submodules=yes --all -q
-            If ($LASTEXITCODE -ne 0) {
+            if ($LASTEXITCODE -ne 0) {
                 throw "Unable to update $Path from Git."
             }
 
             Remove-GitLocalOnly
         }
-        Finally {
+        finally {
             Pop-Location
         }
     }
-    End
-    {
-        Write-Progress -Activity "Updating Git repositories" -Completed
+    end {
+        Write-Progress -Activity 'Updating Git repositories' -Completed
     }
 }

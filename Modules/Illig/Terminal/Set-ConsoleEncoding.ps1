@@ -12,17 +12,17 @@
 #>
 function Set-ConsoleEncoding {
     [CmdletBinding()]
-    Param
+    param
     (
-        [Parameter(ParameterSetName = "Unicode")]
+        [Parameter(ParameterSetName = 'Unicode')]
         [Switch]
         $UTF8,
 
-        [Parameter(ParameterSetName = "Default")]
+        [Parameter(ParameterSetName = 'Default')]
         [Switch]
         $Default
     )
-    Process {
+    process {
         if ($Default) {
             [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(437)
         }

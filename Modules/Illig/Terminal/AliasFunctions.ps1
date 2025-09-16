@@ -7,9 +7,9 @@
    get everything without having to constantly pass the -Force parameter.
 #>
 function AliasFunctionDir {
-    [Alias("dir")]
-    Param()
-    Process {
+    [Alias('dir')]
+    param()
+    process {
         Get-ChildItem -Force @args
     }
 }

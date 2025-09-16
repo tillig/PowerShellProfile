@@ -8,13 +8,13 @@
 #>
 function Remove-TempFiles {
     [CmdletBinding(SupportsShouldProcess = $true)]
-    Param
+    param
     (
     )
 
-    Begin {
+    begin {
         if (-not ($isDesktop -or $IsWindows)) {
-            throw "This command is only supported for Windows."
+            throw 'This command is only supported for Windows.'
         }
 
         $tempFolders = @(
@@ -26,9 +26,9 @@ function Remove-TempFiles {
             "$($env:windir)\Microsoft.NET\Framework64\v2.0.50727\Temporary ASP.NET Files",
             "$($env:windir)\Microsoft.NET\Framework64\v4.0.30319\Temporary ASP.NET Files")
     }
-    Process {
+    process {
         foreach ($tempFolder in $tempFolders) {
-            if ((Test-Path $tempFolder) -and ($pscmdlet.ShouldProcess("$tempFolder", "Remove items from temporary folder"))) {
+            if ((Test-Path $tempFolder) -and ($pscmdlet.ShouldProcess("$tempFolder", 'Remove items from temporary folder'))) {
                 Get-ChildItem $tempFolder | Remove-Item -Force -Recurse
             }
         }

@@ -12,11 +12,11 @@
 #>
 function Enable-ScriptBasedPrompt {
     [CmdletBinding(SupportsShouldProcess = $False)]
-    Param()
-    Begin {
+    param()
+    begin {
         Import-Module posh-git
     }
-    Process {
+    process {
         ###
         # Custom prompt adapted from Brad Wilson
         # http://bradwilson.io/blog/prompt/powershell
@@ -203,7 +203,7 @@ function Enable-ScriptBasedPrompt {
 
             if ($null -ne $scriptReturnValues['kubectl']) {
                 # Slim down GUIDs in the context.
-                $kubeContext = $($scriptReturnValues['kubectl']) -Replace '([-f0-9]{2})[a-f0-9]{6}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{10}([a-f0-9]{2})', "`$1..`$2"
+                $kubeContext = $($scriptReturnValues['kubectl']) -replace '([-f0-9]{2})[a-f0-9]{6}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{10}([a-f0-9]{2})', "`$1..`$2"
                 Write-Host " ⎈ $kubeContext " -NoNewline -BackgroundColor DarkYellow -ForegroundColor Black
             }
 

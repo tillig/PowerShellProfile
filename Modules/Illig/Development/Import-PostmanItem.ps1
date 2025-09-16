@@ -32,9 +32,9 @@
     data. If the name of the collection in the JSON file is different than the
     name in Postman right now, the name in Postman will also be updated.
 #>
-Function Import-PostmanItem {
+function Import-PostmanItem {
     [CmdletBinding(SupportsShouldProcess = $False)]
-    Param(
+    param(
         [Parameter(Mandatory = $True)]
         [ValidateNotNullOrEmpty()]
         [string]
@@ -65,32 +65,32 @@ Function Import-PostmanItem {
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [string]
-        $WorkspaceName = "My Workspace"
+        $WorkspaceName = 'My Workspace'
     )
 
-    Begin {
+    begin {
         enum ItemType { Collection; Environment; }
-        $baseUrl = "https://api.getpostman.com"
+        $baseUrl = 'https://api.getpostman.com'
         $headers = @{
-            "Content-Type" = "application/json"
-            "X-API-Key"    = $ApiKey
+            'Content-Type' = 'application/json'
+            'X-API-Key'    = $ApiKey
         }
 
-        Function Get-Workspaces {
+        function Get-Workspaces {
             Invoke-RestMethod -Uri "$baseUrl/workspaces" -Headers $headers
         }
 
-        $allWorkspaces = Get-Workspaces | Select-Object -ExpandProperty "workspaces"
+        $allWorkspaces = Get-Workspaces | Select-Object -ExpandProperty 'workspaces'
     }
 
-    Process {
-        If ([ItemType]::Collection -eq $ItemType) {
-            $plural = "collections"
-            $singular = "collection"
+    process {
+        if ([ItemType]::Collection -eq $ItemType) {
+            $plural = 'collections'
+            $singular = 'collection'
         }
-        Else {
-            $plural = "environments"
-            $singular = "environment"
+        else {
+            $plural = 'environments'
+            $singular = 'environment'
         }
 
         $fullFilePath = Resolve-Path $FilePath
@@ -100,18 +100,18 @@ Function Import-PostmanItem {
         } | ConvertTo-Json -Depth 100
 
         $targetWorkspace = $allWorkspaces | Where-Object { $_.name -eq $WorkspaceName } | Select-Object -First 1
-        If ($Null -eq $targetWorkspace) {
+        if ($Null -eq $targetWorkspace) {
             throw "Unable to find workspace: $WorkspaceName"
         }
         Write-Verbose "Found workspace $($targetWorkspace.name): $($targetWorkspace.id)"
 
         $targetUrl = "$baseUrl/$plural"
-        If (-not [String]::IsNullOrEmpty($ItemUid)) {
-            $verb = "PUT"
+        if (-not [String]::IsNullOrEmpty($ItemUid)) {
+            $verb = 'PUT'
             $targetUrl = "$targetUrl/$ItemUid"
         }
-        Else {
-            $verb = "POST"
+        else {
+            $verb = 'POST'
         }
 
         $item = Invoke-RestMethod -Uri "$targetUrl`?workspaceId=$($targetWorkspace.id)" -Method $verb -Headers $headers -Body $body

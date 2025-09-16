@@ -16,12 +16,12 @@
 function Test-AnsiSupport {
     [CmdletBinding()]
     [OutputType([String])]
-    Param
+    param
     (
     )
 
-    Process {
-        $isDesktop = ($PSVersionTable.PSEdition -eq "Desktop")
+    process {
+        $isDesktop = ($PSVersionTable.PSEdition -eq 'Desktop')
         if (-not ($isDesktop -or $IsWindows)) {
             # Assume other OS has it figured out.
             return $true
@@ -34,7 +34,7 @@ function Test-AnsiSupport {
 
         $vtl = Get-ItemProperty HKCU:\Console -Name VirtualTerminalLevel -ErrorAction SilentlyContinue
         if (($null -eq $vtl) -or ($vtl.VirtualTerminalLevel -ne 1)) {
-            Write-Warning "Enable ANSI color by executing: Set-ItemProperty HKCU:\Console VirtualTerminalLevel -Type DWORD 1"
+            Write-Warning 'Enable ANSI color by executing: Set-ItemProperty HKCU:\Console VirtualTerminalLevel -Type DWORD 1'
             return $false
         }
 

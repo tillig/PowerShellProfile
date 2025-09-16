@@ -15,32 +15,32 @@
 function New-MachineKey {
     [CmdletBinding(HelpUri = 'https://support.microsoft.com/en-us/kb/2915218#AppendixA')]
     [OutputType([String])]
-    Param
+    param
     (
-        [ValidateSet("AES", "DES", "3DES")]
+        [ValidateSet('AES', 'DES', '3DES')]
         [string]$Decryption = 'AES',
-        [ValidateSet("MD5", "SHA1", "HMACSHA256", "HMACSHA384", "HMACSHA512")]
+        [ValidateSet('MD5', 'SHA1', 'HMACSHA256', 'HMACSHA384', 'HMACSHA512')]
         [string]$Validation = 'HMACSHA256',
         [switch]$PrettyPrint
     )
 
-    Process {
+    process {
         function BinaryToHex {
             [CmdLetBinding()]
-            Param($bytes)
-            Process {
-                $builder = new-object System.Text.StringBuilder
+            param($bytes)
+            process {
+                $builder = New-Object System.Text.StringBuilder
                 foreach ($b in $bytes) {
-                    $builder = $builder.AppendFormat([System.Globalization.CultureInfo]::InvariantCulture, "{0:X2}", $b)
+                    $builder = $builder.AppendFormat([System.Globalization.CultureInfo]::InvariantCulture, '{0:X2}', $b)
                 }
                 $builder
             }
         }
 
         switch ($Decryption) {
-            "AES" { $decryptionObject = new-object System.Security.Cryptography.AesCryptoServiceProvider }
-            "DES" { $decryptionObject = new-object System.Security.Cryptography.DESCryptoServiceProvider }
-            "3DES" { $decryptionObject = new-object System.Security.Cryptography.TripleDESCryptoServiceProvider }
+            'AES' { $decryptionObject = New-Object System.Security.Cryptography.AesCryptoServiceProvider }
+            'DES' { $decryptionObject = New-Object System.Security.Cryptography.DESCryptoServiceProvider }
+            '3DES' { $decryptionObject = New-Object System.Security.Cryptography.TripleDESCryptoServiceProvider }
         }
 
         $decryptionObject.GenerateKey()
@@ -48,20 +48,20 @@ function New-MachineKey {
         $decryptionObject.Dispose()
 
         switch ($Validation) {
-            "MD5" { $validationObject = new-object System.Security.Cryptography.HMACMD5 }
-            "SHA1" { $validationObject = new-object System.Security.Cryptography.HMACSHA1 }
-            "HMACSHA256" { $validationObject = new-object System.Security.Cryptography.HMACSHA256 }
-            "HMACSHA385" { $validationObject = new-object System.Security.Cryptography.HMACSHA384 }
-            "HMACSHA512" { $validationObject = new-object System.Security.Cryptography.HMACSHA512 }
+            'MD5' { $validationObject = New-Object System.Security.Cryptography.HMACMD5 }
+            'SHA1' { $validationObject = New-Object System.Security.Cryptography.HMACSHA1 }
+            'HMACSHA256' { $validationObject = New-Object System.Security.Cryptography.HMACSHA256 }
+            'HMACSHA385' { $validationObject = New-Object System.Security.Cryptography.HMACSHA384 }
+            'HMACSHA512' { $validationObject = New-Object System.Security.Cryptography.HMACSHA512 }
         }
 
         $validationKey = BinaryToHex($validationObject.Key)
         $validationObject.Dispose()
         if ($PrettyPrint) {
-            $space = [System.Environment]::NewLine + "            "
+            $space = [System.Environment]::NewLine + '            '
         }
         else {
-            $space = " "
+            $space = ' '
         }
 
         [string]::Format([System.Globalization.CultureInfo]::InvariantCulture,

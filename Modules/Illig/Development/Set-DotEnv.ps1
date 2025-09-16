@@ -15,7 +15,7 @@
 #>
 function Set-DotEnv {
     [CmdletBinding(SupportsShouldProcess = $True)]
-    Param
+    param
     (
         [Parameter(Mandatory = $True,
             ValueFromPipeline = $True,
@@ -26,19 +26,19 @@ function Set-DotEnv {
         $File
     )
 
-    Process {
-        If ( -not (Test-Path $File)) {
+    process {
+        if ( -not (Test-Path $File)) {
             throw "Unable to find file $File"
         }
 
         Get-Content $File |
-        ForEach-Object { $_.Trim() } |
-        Where-Object { -not $_.StartsWith('#') -and -not [string]::IsNullOrEmpty($_) } |
-        ForEach-Object {
-            $kvp = $_ -split "=", 2;
-            If ($PSCmdlet.ShouldProcess("$($kvp[0])", "set value $($kvp[1])")) {
-                [Environment]::SetEnvironmentVariable($kvp[0], $kvp[1]) | Out-Null
+            ForEach-Object { $_.Trim() } |
+            Where-Object { -not $_.StartsWith('#') -and -not [string]::IsNullOrEmpty($_) } |
+            ForEach-Object {
+                $kvp = $_ -split '=', 2
+                if ($PSCmdlet.ShouldProcess("$($kvp[0])", "set value $($kvp[1])")) {
+                    [Environment]::SetEnvironmentVariable($kvp[0], $kvp[1]) | Out-Null
+                }
             }
-        }
     }
 }

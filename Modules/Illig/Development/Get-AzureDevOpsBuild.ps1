@@ -23,7 +23,7 @@
 #>
 function Get-AzureDevOpsBuild {
     [CmdletBinding()]
-    Param(
+    param(
         [Parameter(Mandatory = $True)]
         [string]
         [ValidateNotNullOrEmpty()]
@@ -52,17 +52,17 @@ function Get-AzureDevOpsBuild {
         $RefreshIntervalSeconds = 10
 
     )
-    Begin {
+    begin {
         $az = Get-Command az -ErrorAction Ignore
         if ($Null -eq $az) {
             Write-Error 'Unable to locate the az CLI.'
-            Exit 1
+            exit 1
         }
 
-        Function Get-PipelineRun {
+        function Get-PipelineRun {
             Write-Verbose "Querying Azure DevOps for pipeline run $BuildId in $Organization/$Project."
             $pipeline = az pipelines build show --org $Organization --project $Project --id $buildId | ConvertFrom-Json -Depth 10
-            If ($LASTEXITCODE -ne 0) {
+            if ($LASTEXITCODE -ne 0) {
                 throw "Unable to use az CLI to query $Organization/$Project for pipeline $BuildId. Check for typos, Azure CLI context, authentication issues."
             }
 
@@ -83,11 +83,11 @@ function Get-AzureDevOpsBuild {
             $stepTable = @{}
             $timeline.records | ForEach-Object {
                 $id = $_.id
-                If (-not $id) {
+                if (-not $id) {
                     $id = '<root>'
                 }
 
-                If ($_.startTime) {
+                if ($_.startTime) {
                     $startTime = $_.startTime.ToLocalTime()
                 }
 
@@ -108,10 +108,10 @@ function Get-AzureDevOpsBuild {
 
             # Link children to parents.
             $stepTable.Values | ForEach-Object {
-                If ($_.ParentId) {
+                if ($_.ParentId) {
                     $currentId = $_.Id
                     $hasChild = $StepTable[$_.ParentId].Children | Where-Object { $currentId -eq $_.Id }
-                    If (-not $hasChild) {
+                    if (-not $hasChild) {
                         $StepTable[$_.ParentId].Children += $_
                     }
                 }
@@ -127,24 +127,24 @@ function Get-AzureDevOpsBuild {
             $report
         }
 
-        Function Out-Report {
-            Param(
+        function Out-Report {
+            param(
                 [AzureDevOpsPipelineRun] $PipelineRun
             )
             Write-Output "$($PipelineRun.Name) - $($PipelineRun.Id) [$($PipelineRun.ReportTime.ToLocalTime().ToString('HH:mm:ss'))]"
             Out-ReportSteps -Steps $PipelineRun.Timeline
-            If ($PipelineRun.State -eq 'completed') {
+            if ($PipelineRun.State -eq 'completed') {
                 Write-Output "Status: $($PipelineRun.State) / $($PipelineRun.Result)"
             }
-            Else {
+            else {
                 Write-Output "Status: $($PipelineRun.State)"
             }
 
             Write-Output "$Organization/$([System.Net.WebUtility]::UrlEncode($Project).Replace('+','%20'))/_build/results?buildId=$($PipelineRun.Id)&view=results"
         }
 
-        Function Out-ReportSteps {
-            Param(
+        function Out-ReportSteps {
+            param(
                 [AzureDevOpsPipelineStep[]] $Steps,
                 [int] $Indent = 0
             )
@@ -155,36 +155,36 @@ function Get-AzureDevOpsBuild {
                 $errors = ''
                 $warnings = ''
 
-                If ($step.State -eq 'inProgress') {
+                if ($step.State -eq 'inProgress') {
                     $result = '➡️'
                 }
-                ElseIf ($step.State -eq 'pending') {
+                elseif ($step.State -eq 'pending') {
                     $result = '⏳'
                 }
-                ElseIf ($step.Result -eq 'succeeded') {
+                elseif ($step.Result -eq 'succeeded') {
                     $result = '✅'
                 }
-                ElseIf ($step.Result -eq 'failed') {
+                elseif ($step.Result -eq 'failed') {
                     $result = '❌'
                 }
-                ElseIf ($step.Result -eq 'failed') {
+                elseif ($step.Result -eq 'failed') {
                     $result = '⊘'
                 }
 
-                If ($step.Errors -gt 0) {
+                if ($step.Errors -gt 0) {
                     $errors = " ⛔️ $($step.Errors)"
                 }
 
-                If ($step.Warnings -gt 0) {
+                if ($step.Warnings -gt 0) {
                     $warnings = " ⚠ $($step.Warnings)"
                 }
 
                 $startTime = 'n/a'
-                If ($step.StartTime) {
+                if ($step.StartTime) {
                     $startTime = $step.StartTime.ToLocalTime().ToString('HH:mm:ss')
                 }
 
-                If ($step.Result -ne 'skipped') {
+                if ($step.Result -ne 'skipped') {
                     $indentString = New-Object -TypeName 'System.String' -ArgumentList ' ', $Indent
                     Write-Output "$indentString$result $($step.Name) [$startTime]$errors$warnings"
                 }
@@ -194,24 +194,24 @@ function Get-AzureDevOpsBuild {
         }
 
     }
-    Process {
-        Do {
+    process {
+        do {
             $pipelineRun = Get-PipelineRun
-            If ($ReportFormat) {
+            if ($ReportFormat) {
                 Out-Report -PipelineRun $pipelineRun
             }
-            Else {
+            else {
                 $pipelineRun
             }
 
-            If ($Watch -and $pipelineRun.State -ne 'completed') {
-                If ($ReportFormat) {
+            if ($Watch -and $pipelineRun.State -ne 'completed') {
+                if ($ReportFormat) {
                     Write-Host "Refreshing in $RefreshIntervalSeconds seconds..."
                     Write-Host '========================================'
                 }
 
                 Start-Sleep -Seconds $RefreshIntervalSeconds
             }
-        } While ($Watch -and $pipelineRun.State -ne 'completed')
+        } while ($Watch -and $pipelineRun.State -ne 'completed')
     }
 }

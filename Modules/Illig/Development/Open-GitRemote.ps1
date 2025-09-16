@@ -22,7 +22,7 @@
 #>
 function Open-GitRemote {
     [CmdletBinding(SupportsShouldProcess = $False)]
-    Param(
+    param(
         [Parameter(Mandatory = $False, Position = 0)]
         [string]
         [ValidateNotNullOrEmpty()]
@@ -31,9 +31,9 @@ function Open-GitRemote {
         [Parameter(Mandatory = $False)]
         [string]
         [ValidateNotNullOrEmpty()]
-        $Remote = "origin"
+        $Remote = 'origin'
     )
-    Begin {
+    begin {
         class GitInfo {
             [string]$Domain
             [string]$Path
@@ -43,7 +43,7 @@ function Open-GitRemote {
             [string]$Head
             [string]$WebViewBaseUrl
             [bool]IsDetachedHead() {
-                return "(detached)" -eq $this.Head
+                return '(detached)' -eq $this.Head
             }
         }
         class GitProvider {
@@ -57,7 +57,7 @@ function Open-GitRemote {
                 return $null
             }
             SetWebViewBaseUrl([GitInfo]$GitInfo) {
-                If ($GitInfo.WebViewBaseUrl) {
+                if ($GitInfo.WebViewBaseUrl) {
                     return
                 }
                 $GitInfo.WebViewBaseUrl = "https://$($GitInfo.Domain)/$($GitInfo.Path)"
@@ -74,12 +74,12 @@ function Open-GitRemote {
             [bool]$Legacy # visualstudio.com
             AzureDevOpsGitProvider([bool]$Legacy) {
                 $this.Legacy = $Legacy
-                $this.Name = "Azure DevOps"
-                If ($Legacy) {
-                    $this.HostMatch = "\bvisualstudio\.com$"
+                $this.Name = 'Azure DevOps'
+                if ($Legacy) {
+                    $this.HostMatch = '\bvisualstudio\.com$'
                 }
-                Else {
-                    $this.HostMatch = "\bdev\.azure\.com$"
+                else {
+                    $this.HostMatch = '\bdev\.azure\.com$'
                 }
             }
             [string]GetUrlForBranch([GitInfo]$GitInfo) {
@@ -91,29 +91,29 @@ function Open-GitRemote {
                 return $this.EncodeUri("$($GitInfo.WebViewBaseUrl)/commit/$($GitInfo.Hash)")
             }
             SetWebViewBaseUrl([GitInfo]$GitInfo) {
-                If ($GitInfo.WebViewBaseUrl) {
+                if ($GitInfo.WebViewBaseUrl) {
                     return
                 }
 
                 # Convert SSH to HTTPS URLs
-                If ($GitInfo.Domain -match "^(ssh|vs-ssh)\.") {
+                if ($GitInfo.Domain -match '^(ssh|vs-ssh)\.') {
                     # git@ssh.dev.azure.com:v3/OrgName/ProjectName/repo-name
                     # will have been converted to
                     # https://ssh.dev.azure.com/v3/OrgName/ProjectName/repo-name
                     # so remove the `ssh.` on the host and the `v3` in the path.
-                    $GitInfo.Domain = $GitInfo.Domain -replace "^(ssh|vs-ssh)\.", ''
-                    $GitInfo.Path = $GitInfo.Path -replace "^\/?v\d\/", ''
+                    $GitInfo.Domain = $GitInfo.Domain -replace '^(ssh|vs-ssh)\.', ''
+                    $GitInfo.Path = $GitInfo.Path -replace '^\/?v\d\/', ''
 
                     # Add in /_git/ into the URL.
-                    If ($GitInfo.Path -match "^\/(.*?)\/(.*?)\/(.*)") {
+                    if ($GitInfo.Path -match '^\/(.*?)\/(.*?)\/(.*)') {
                         $org = $Matches[1]
                         $project = $Matches[2]
                         $rest = $Matches[3]
-                        If ($this.Legacy) {
+                        if ($this.Legacy) {
                             $GitInfo.Host = "$org`.$($GitInfo.Host)"
                             $GitInfo.Path = "$project/_git/$rest"
                         }
-                        Else {
+                        else {
                             $GitInfo.Path = "/$org/$project/_git/$rest"
                         }
                     }
@@ -125,8 +125,8 @@ function Open-GitRemote {
         class BitbucketGitProvider : GitProvider {
             # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/remotes/bitbucket.ts
             BitbucketGitProvider() {
-                $this.Name = "Bitbucket"
-                $this.HostMatch = "bitbucket\.org"
+                $this.Name = 'Bitbucket'
+                $this.HostMatch = 'bitbucket\.org'
             }
             [string]GetUrlForBranch([GitInfo]$GitInfo) {
                 $this.SetWebViewBaseUrl($GitInfo)
@@ -140,8 +140,8 @@ function Open-GitRemote {
         class BitbucketServerGitProvider : GitProvider {
             # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/remotes/bitbucket-server.ts
             BitbucketServerGitProvider() {
-                $this.Name = "Bitbucket Server"
-                $this.HostMatch = "^(.+\/(?:bitbucket|stash))\/scm\/(.+)$"
+                $this.Name = 'Bitbucket Server'
+                $this.HostMatch = '^(.+\/(?:bitbucket|stash))\/scm\/(.+)$'
             }
             [string]GetUrlForBranch([GitInfo]$GitInfo) {
                 $this.SetWebViewBaseUrl($GitInfo)
@@ -155,11 +155,11 @@ function Open-GitRemote {
         class GerritGitProvider : GitProvider {
             # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/remotes/gerrit.ts
             GerritGitProvider() {
-                $this.Name = "Gerrit"
-                $this.HostMatch = "\bgerrithub\.io$"
+                $this.Name = 'Gerrit'
+                $this.HostMatch = '\bgerrithub\.io$'
             }
             SetWebViewBaseUrl([GitInfo]$GitInfo) {
-                If ($GitInfo.WebViewBaseUrl) {
+                if ($GitInfo.WebViewBaseUrl) {
                     return
                 }
 
@@ -171,8 +171,8 @@ function Open-GitRemote {
                 $ git clone "https://username@review.gerrithub.io/a/jenkinsci/gerrit-code-review-plugin"
                 Where username may be omitted, but the "a/" prefix is always present.
                 #>
-                If ($GitInfo.Scheme.StartsWith("http")) {
-                    $GitInfo.Path = $GitInfo.Path -replace "^a\//", ''
+                if ($GitInfo.Scheme.StartsWith('http')) {
+                    $GitInfo.Path = $GitInfo.Path -replace '^a\//', ''
                 }
 
                 ([GitProvider]$this).SetWebViewBaseUrl($GitInfo)
@@ -181,8 +181,8 @@ function Open-GitRemote {
         class GiteaGitProvider : GitProvider {
             # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/remotes/gitea.ts
             GiteaGitProvider() {
-                $this.Name = "Gitea"
-                $this.HostMatch = "\bgitea\b"
+                $this.Name = 'Gitea'
+                $this.HostMatch = '\bgitea\b'
             }
             [string]GetUrlForBranch([GitInfo]$GitInfo) {
                 $this.SetWebViewBaseUrl($GitInfo)
@@ -196,8 +196,8 @@ function Open-GitRemote {
         class GitHubGitProvider : GitProvider {
             # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/remotes/github.ts
             GitHubGitProvider() {
-                $this.Name = "GitHub"
-                $this.HostMatch = "github\.com"
+                $this.Name = 'GitHub'
+                $this.HostMatch = 'github\.com'
             }
             [string]GetUrlForBranch([GitInfo]$GitInfo) {
                 $this.SetWebViewBaseUrl($GitInfo)
@@ -211,8 +211,8 @@ function Open-GitRemote {
         class GitLabGitProvider : GitProvider {
             # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/remotes/gitlab.ts
             GitLabGitProvider() {
-                $this.Name = "GitLab"
-                $this.HostMatch = "gitlab\.com"
+                $this.Name = 'GitLab'
+                $this.HostMatch = 'gitlab\.com'
             }
             [string]GetUrlForBranch([GitInfo]$GitInfo) {
                 $this.SetWebViewBaseUrl($GitInfo)
@@ -225,27 +225,27 @@ function Open-GitRemote {
         }
         class GitLabCustomDomainGitProvider : GitLabGitProvider {
             GitLabCustomDomainGitProvider() {
-                $this.Name = "GitLab (Custom Domain)"
-                $this.HostMatch = "\bgitlab\b"
+                $this.Name = 'GitLab (Custom Domain)'
+                $this.HostMatch = '\bgitlab\b'
             }
         }
         class GoogleSourceGitProvider : GerritGitProvider {
             # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/remotes/google-source.ts
             GoogleSourceGitProvider() {
-                $this.Name = "Google Source"
-                $this.HostMatch = "\bgooglesource\.com$"
+                $this.Name = 'Google Source'
+                $this.HostMatch = '\bgooglesource\.com$'
             }
         }
 
         $git = Get-Command git -ErrorAction Ignore
         if ($Null -eq $git) {
-            Write-Error "Unable to locate git."
-            Exit 1
+            Write-Error 'Unable to locate git.'
+            exit 1
         }
 
-        If (-not (Test-Path $Path)) {
+        if (-not (Test-Path $Path)) {
             Write-Error "Unable to find path $Path"
-            Exit 1
+            exit 1
         }
 
         $providers = [GitProvider[]]@(
@@ -261,9 +261,9 @@ function Open-GitRemote {
             [GoogleSourceGitProvider]::new()
         )
 
-        Function GetGitInfo {
+        function GetGitInfo {
             [OutputType([GitInfo])]
-            Param(
+            param(
                 [Parameter(Mandatory = $True, Position = 0)]
                 [string]
                 [ValidateNotNullOrEmpty()]
@@ -273,7 +273,7 @@ function Open-GitRemote {
             $gitInfo = [GitInfo]::new()
 
             $gitInfo.RemoteUrl = git remote get-url $Remote
-            If ($LASTEXITCODE -ne 0) {
+            if ($LASTEXITCODE -ne 0) {
                 throw "Unable to get URL for remote '$Remote'."
                 exit 1
             }
@@ -283,9 +283,9 @@ function Open-GitRemote {
             # or git@github.com:autofac/Autofac.git.
             # This parses into domain/host and path so we can calculate from that.
             # https://github.com/gitkraken/vscode-gitlens/blob/main/src/git/parsers/remoteParser.ts
-            $gitRemoteParser = "^(?:(git:\/\/)(.*?)\/|(https?:\/\/)(?:.*?@)?(.*?)\/|git@(.*):|(ssh:\/\/)(?:.*@)?(.*?)(?::.*?)?(?:\/|(?=~))|(?:.*?@)(.*?):)(.*)$"
-            If ($gitInfo.RemoteUrl -match $gitRemoteParser) {
-                $gitInfo.Scheme = $Matches[1] ?? $Matches[3] ?? $Matches[6] ?? "https://"
+            $gitRemoteParser = '^(?:(git:\/\/)(.*?)\/|(https?:\/\/)(?:.*?@)?(.*?)\/|git@(.*):|(ssh:\/\/)(?:.*@)?(.*?)(?::.*?)?(?:\/|(?=~))|(?:.*?@)(.*?):)(.*)$'
+            if ($gitInfo.RemoteUrl -match $gitRemoteParser) {
+                $gitInfo.Scheme = $Matches[1] ?? $Matches[3] ?? $Matches[6] ?? 'https://'
                 $gitInfo.Domain = $Matches[2] ?? $Matches[4] ?? $Matches[5] ?? $Matches[7] ?? $Matches[8]
                 $gitInfo.Path = $Matches[9] -replace '\.git\/?$', ''
             }
@@ -306,17 +306,17 @@ function Open-GitRemote {
             # branch.head (detached)
             #>
             $gitStatus = &git status --branch --porcelain=2
-            If ($LASTEXITCODE -ne 0) {
-                throw "Unable to get git status."
+            if ($LASTEXITCODE -ne 0) {
+                throw 'Unable to get git status.'
                 exit 1
             }
             $gitStatus | ForEach-Object {
                 $line = $_.Trim().TrimStart('#').Trim()
                 $parts = $line.Split(' ', [System.StringSplitOptions]::RemoveEmptyEntries)
-                If ($parts.Length -eq 2) {
-                    Switch ($parts[0]) {
-                        "branch.oid" { $gitInfo.Hash = $parts[1] }
-                        "branch.head" { $gitInfo.Head = $parts[1] }
+                if ($parts.Length -eq 2) {
+                    switch ($parts[0]) {
+                        'branch.oid' { $gitInfo.Hash = $parts[1] }
+                        'branch.head' { $gitInfo.Head = $parts[1] }
                     }
                 }
             }
@@ -330,9 +330,9 @@ function Open-GitRemote {
             $gitInfo
         }
 
-        Function CalculateWebView {
+        function CalculateWebView {
             [OutputType([string])]
-            Param(
+            param(
                 [Parameter(Mandatory = $True, Position = 0)]
                 [GitInfo]
                 [ValidateNotNull()]
@@ -352,19 +352,19 @@ function Open-GitRemote {
             #>
             Write-Verbose "Calculating web view from remote host '$($GitInfo.Domain)'."
             $provider = $providers | Where-Object { $GitInfo.Domain -match $_.HostMatch } | Select-Object -First 1
-            If ($null -eq $provider) {
+            if ($null -eq $provider) {
                 throw "Unable to determine web view for remote URL $($GitInfo.Domain)"
             }
-            Else {
+            else {
                 Write-Verbose "Using remote provider $($provider.Name)."
             }
 
-            If ($GitInfo.IsDetachedHead()) {
-                Write-Verbose "Working in detached head."
+            if ($GitInfo.IsDetachedHead()) {
+                Write-Verbose 'Working in detached head.'
                 $webViewUrl = $provider.GetUrlForCommit($GitInfo)
             }
-            Else {
-                Write-Verbose "Working on branch."
+            else {
+                Write-Verbose 'Working on branch.'
                 $webViewUrl = $provider.GetUrlForBranch($GitInfo)
             }
 
@@ -372,25 +372,25 @@ function Open-GitRemote {
             return $webViewUrl
         }
     }
-    Process {
-        Try {
+    process {
+        try {
             Push-Location $Path
 
             $gitInfo = GetGitInfo $Remote
             $webViewUrl = CalculateWebView $gitInfo
 
             # Start the browser process.
-            If ($IsMacOS) {
+            if ($IsMacOS) {
                 &open $webViewUrl
             }
-            ElseIf ($IsLinux) {
+            elseif ($IsLinux) {
                 &xdg-open $webViewUrl
             }
-            Else {
+            else {
                 &start $webViewUrl
             }
         }
-        Finally {
+        finally {
             Pop-Location
         }
     }

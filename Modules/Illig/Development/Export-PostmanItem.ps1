@@ -27,13 +27,13 @@
     Loads the JSON for the "My API" collection from the default Postman
     workspace "My Workspace" and exports it to a file.
 .EXAMPLE
-    Export-PostmanItem -ApiKey "YOUR-API-KEY" -ItemType Envirionment -ItemName "Testing" -WorkspaceName "QA"
+    Export-PostmanItem -ApiKey "YOUR-API-KEY" -ItemType Environment -ItemName "Testing" -WorkspaceName "QA"
 
     Loads the JSON for the "Testing" environment from the "QA" workspace.
 #>
-Function Export-PostmanItem {
+function Export-PostmanItem {
     [CmdletBinding(SupportsShouldProcess = $False)]
-    Param(
+    param(
         [Parameter(Mandatory = $True)]
         [ValidateNotNullOrEmpty()]
         [string]
@@ -59,18 +59,18 @@ Function Export-PostmanItem {
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [string]
-        $WorkspaceName = "My Workspace"
+        $WorkspaceName = 'My Workspace'
     )
 
-    Begin {
+    begin {
         enum ItemType { Collection; Environment; }
-        $baseUrl = "https://api.getpostman.com"
+        $baseUrl = 'https://api.getpostman.com'
         $headers = @{
-            "Content-Type" = "application/json"
-            "X-API-Key"    = $ApiKey
+            'Content-Type' = 'application/json'
+            'X-API-Key'    = $ApiKey
         }
 
-        Function Get-Workspaces {
+        function Get-Workspaces {
             Invoke-RestMethod -Uri "$baseUrl/workspaces" -Headers $headers
         }
 
@@ -83,62 +83,62 @@ Function Export-PostmanItem {
         .PARAMETER obj
             The PSObject with properties to iterate/recurse over.
         #>
-        Function Remove-IdProperty {
-            Param([PSObject] $obj)
-            $obj.Properties.Remove("id");
+        function Remove-IdProperty {
+            param([PSObject] $obj)
+            $obj.Properties.Remove('id')
             $obj.Members | Where-Object { $_.MemberType -eq 'NoteProperty' } | ForEach-Object {
                 $member = $_
-                If ($member.TypeNameOfValue -eq "System.Object[]" ) {
+                if ($member.TypeNameOfValue -eq 'System.Object[]' ) {
                     $member.Value | ForEach-Object {
                         Remove-IdProperty $_.PSObject
                     }
                 }
-                ElseIf ($member.TypeNameOfValue -eq "System.Management.Automation.PSCustomObject") {
+                elseif ($member.TypeNameOfValue -eq 'System.Management.Automation.PSCustomObject') {
                     Remove-IdProperty $member.Value.PSObject
                 }
             }
         }
 
-        $allWorkspaces = Get-Workspaces | Select-Object -ExpandProperty "workspaces"
+        $allWorkspaces = Get-Workspaces | Select-Object -ExpandProperty 'workspaces'
     }
 
-    Process {
-        If ([ItemType]::Collection -eq $ItemType) {
-            $plural = "collections"
-            $singular = "collection"
+    process {
+        if ([ItemType]::Collection -eq $ItemType) {
+            $plural = 'collections'
+            $singular = 'collection'
         }
-        Else {
-            $plural = "environments"
-            $singular = "environment"
+        else {
+            $plural = 'environments'
+            $singular = 'environment'
         }
 
         $targetWorkspace = $allWorkspaces | Where-Object { $_.name -eq $WorkspaceName } | Select-Object -First 1
-        If ($Null -eq $targetWorkspace) {
+        if ($Null -eq $targetWorkspace) {
             throw "Unable to find workspace: $WorkspaceName"
         }
         Write-Verbose "Found workspace $($targetWorkspace.name): $($targetWorkspace.id)"
         $items = Invoke-RestMethod -Uri "$baseUrl/$plural`?workspaceId=$($targetWorkspace.id)" -Headers $headers | Select-Object -ExpandProperty $plural
         Write-Verbose "Found $($items.Count) items."
         $itemMetadata = $items | Where-Object { $_.name -eq $ItemName } | Select-Object -First 1
-        If ($Null -eq $itemMetadata) {
+        if ($Null -eq $itemMetadata) {
             throw "Unable to find item: $ItemName"
         }
         $itemToExport = Invoke-RestMethod -Uri "$baseUrl/$plural/$($itemMetadata.uid)`?workspaceId=$($targetWorkspace.id)" -Headers $headers | Select-Object -ExpandProperty $singular
 
         # Update properties to be more like what comes from a UI export.
-        $itemToExport.PSObject.Properties.Remove("createdAt")
-        $itemToExport.PSObject.Properties.Remove("isPublic")
-        $itemToExport.PSObject.Properties.Remove("owner")
-        $itemToExport.PSObject.Properties.Remove("updatedAt")
+        $itemToExport.PSObject.Properties.Remove('createdAt')
+        $itemToExport.PSObject.Properties.Remove('isPublic')
+        $itemToExport.PSObject.Properties.Remove('owner')
+        $itemToExport.PSObject.Properties.Remove('updatedAt')
 
-        If ([ItemType]::Collection -eq $ItemType) {
-            $itemToExport.info.PSObject.Properties.Remove("updatedAt")
+        if ([ItemType]::Collection -eq $ItemType) {
+            $itemToExport.info.PSObject.Properties.Remove('updatedAt')
             Remove-IdProperty $itemToExport.PSObject
         }
-        Else {
-            $itemToExport | Add-Member -MemberType NoteProperty -Name "_postman_exported_at" -Value (Get-Date -AsUTC -Format o)
-            $itemToExport | Add-Member -MemberType NoteProperty -Name "_postman_exported_using" -Value "PowerShell"
-            $itemToExport | Add-Member -MemberType NoteProperty -Name "_postman_variable_scope" -Value $singular
+        else {
+            $itemToExport | Add-Member -MemberType NoteProperty -Name '_postman_exported_at' -Value (Get-Date -AsUTC -Format o)
+            $itemToExport | Add-Member -MemberType NoteProperty -Name '_postman_exported_using' -Value 'PowerShell'
+            $itemToExport | Add-Member -MemberType NoteProperty -Name '_postman_variable_scope' -Value $singular
         }
 
         $itemToExport | ConvertTo-Json -Depth 100

@@ -15,34 +15,34 @@
     ruby-3.0.4  False /Users/myname/.rubies/ruby-3.0.4
     ruby-3.1.2  True  /Users/myname/.rubies/ruby-3.1.2
 #>
-Function Get-Ruby {
+function Get-Ruby {
     [CmdletBinding(SupportsShouldProcess = $False)]
-    Param(
+    param(
     )
 
-    Process {
-        $optRubies = Join-Path "opt" "rubies"
-        If ($Env:PREFIX) {
+    process {
+        $optRubies = Join-Path 'opt' 'rubies'
+        if ($Env:PREFIX) {
             $optRubies = Join-Path $Env:PREFIX $optRubies
         }
-        Else {
+        else {
             $optRubies = "$([System.IO.Path]::DirectorySeparatorChar)$optRubies"
         }
-        $search = @($optRubies, (Join-Path $Env:HOME ".rubies"))
-        $rubyVersions = @();
+        $search = @($optRubies, (Join-Path $Env:HOME '.rubies'))
+        $rubyVersions = @()
         $search | ForEach-Object {
             $dir = $_
-            If (Test-Path $dir -PathType Container) {
+            if (Test-Path $dir -PathType Container) {
                 Get-ChildItem $dir -Directory | ForEach-Object {
                     $versionDir = $_
                     $active = $False
-                    If ($Env:RUBY_ROOT -and $Env:RUBY_ROOT -eq $versionDir.FullName) {
+                    if ($Env:RUBY_ROOT -and $Env:RUBY_ROOT -eq $versionDir.FullName) {
                         $active = $True
                     }
                     $rubyVersion = @{
-                        "Version"  = $versionDir.Name
-                        "Active"   = $active
-                        "Location" = $versionDir
+                        'Version'  = $versionDir.Name
+                        'Active'   = $active
+                        'Location' = $versionDir
                     }
                     $rubyVersions += [pscustomobject]$rubyVersion
                 }

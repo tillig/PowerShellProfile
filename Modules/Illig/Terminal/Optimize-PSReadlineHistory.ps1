@@ -47,7 +47,7 @@ function Optimize-PSReadlineHistory {
 
     if (!$HistoryPath) {
         if (Get-Module PSReadline -ErrorAction SilentlyContinue) {
-            $HistoryPath = (Get-PSReadlineOption).HistorySavePath
+            $HistoryPath = (Get-PSReadLineOption).HistorySavePath
         }
         else {
             throw 'You must provide a value for the HistoryPath parameter.'

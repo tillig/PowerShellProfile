@@ -1,7 +1,11 @@
 {
   "cSpell.words": [
+    "autofac",
+    "chruby",
     "lastexitcode",
-    "powerline"
+    "powerline",
+    "rubygems",
+    "rubyopt"
   ],
   "files.watcherExclude": {
     "**/target": true

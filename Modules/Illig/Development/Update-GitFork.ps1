@@ -19,7 +19,7 @@
 function Update-GitFork {
     [CmdletBinding(SupportsShouldProcess = $True,
         ConfirmImpact = 'High')]
-    Param(
+    param(
         [Parameter(Mandatory = $False,
             Position = 0)]
         [string]
@@ -29,32 +29,32 @@ function Update-GitFork {
         [Parameter(Mandatory = $False)]
         [string]
         [ValidateNotNullOrEmpty()]
-        $Upstream = "upstream",
+        $Upstream = 'upstream',
 
         [Parameter(Mandatory = $False)]
         [string[]]
         [ValidateNotNullOrEmpty()]
-        $BranchesToUpdate = @("master", "main", "develop")
+        $BranchesToUpdate = @('master', 'main', 'develop')
     )
-    Begin {
+    begin {
         $git = Get-Command git -ErrorAction Ignore
         if ($Null -eq $git) {
-            Write-Error "Unable to locate git."
-            Exit 1
+            Write-Error 'Unable to locate git.'
+            exit 1
         }
     }
-    Process {
-        If (-not (Test-Path $Path)) {
+    process {
+        if (-not (Test-Path $Path)) {
             throw "Unable to find path $Path"
         }
 
         Push-Location $Path
 
-        Try {
+        try {
             # Keep the original branch so we can switch back to it later.
             $originalBranch = &git branch --show-current
-            If ($LASTEXITCODE -ne 0) {
-                throw "Unable to retrieve current branch."
+            if ($LASTEXITCODE -ne 0) {
+                throw 'Unable to retrieve current branch.'
                 exit 1
             }
 
@@ -62,11 +62,11 @@ function Update-GitFork {
 
             # Validate the remote is configured.
             $remotes = &git remote
-            If (-not ($remotes -is [array])) {
-                throw "There is only one remote configured for this clone. Forks generally have an origin and an upstream."
+            if (-not ($remotes -is [array])) {
+                throw 'There is only one remote configured for this clone. Forks generally have an origin and an upstream.'
             }
 
-            If (-not ($remotes -contains $Upstream)) {
+            if (-not ($remotes -contains $Upstream)) {
                 throw "$Upstream is not one of the configured remotes."
             }
 
@@ -74,12 +74,12 @@ function Update-GitFork {
             &git fetch $Upstream
 
             # Get the branches we have locally
-            Write-Verbose "Getting the list of local branches."
-            $toParse = "["
-            $toParse += (&git branch --format "{`"Name`":`"%(refname:short)`",`"Remote`":`"%(upstream)`",`"Track`":`"%(upstream:track,nobracket)`"}") -Join ","
-            $toParse += "]"
-            If ($LASTEXITCODE -ne 0) {
-                throw "Unable to retrieve branches."
+            Write-Verbose 'Getting the list of local branches.'
+            $toParse = '['
+            $toParse += (&git branch --format "{`"Name`":`"%(refname:short)`",`"Remote`":`"%(upstream)`",`"Track`":`"%(upstream:track,nobracket)`"}") -join ','
+            $toParse += ']'
+            if ($LASTEXITCODE -ne 0) {
+                throw 'Unable to retrieve branches.'
                 exit 1
             }
 
@@ -87,32 +87,32 @@ function Update-GitFork {
             $filteredBranchesToUpdate = $localBranches | Where-Object { $BranchesToUpdate -contains $_.Name } | Select-Object -ExpandProperty Name
             $filteredBranchesToUpdate | ForEach-Object {
                 $branchToUpdate = $_
-                If ($pscmdlet.ShouldProcess("$branchToUpdate", "Update branch with upstream")) {
+                if ($pscmdlet.ShouldProcess("$branchToUpdate", 'Update branch with upstream')) {
                     Write-Verbose "Switching to $branchToUpdate."
                     &git checkout $branchToUpdate
-                    If ($LASTEXITCODE -ne 0) {
-                        throw "Unable to switch branches."
+                    if ($LASTEXITCODE -ne 0) {
+                        throw 'Unable to switch branches.'
                         exit 1
                     }
 
                     Write-Verbose "Updating from $Upstream/$branchToUpdate."
                     &git merge "$Upstream/$branchToUpdate"
-                    If ($LASTEXITCODE -ne 0) {
+                    if ($LASTEXITCODE -ne 0) {
                         throw "Unable to merge $Upstream/$branchToUpdate - check for conflicts and errors."
                         exit 1
                     }
                 }
-                If ($pscmdlet.ShouldProcess("$branchToUpdate", "Push merged changes back to fork")) {
+                if ($pscmdlet.ShouldProcess("$branchToUpdate", 'Push merged changes back to fork')) {
                     Write-Verbose "Pushing $branchToUpdate."
                     &git push
-                    If ($LASTEXITCODE -ne 0) {
-                        throw "Unable to push changes."
+                    if ($LASTEXITCODE -ne 0) {
+                        throw 'Unable to push changes.'
                         exit 1
                     }
                 }
             }
         }
-        Finally {
+        finally {
             &git checkout $originalBranch
             Pop-Location
         }

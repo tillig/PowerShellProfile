@@ -11,14 +11,14 @@
     The kubectl configuration file containing the context to remove. If omitted,
     uses the default configuration file.
 .EXAMPLE
-   Remove-KubectlContext mycontext
+   Remove-KubectlContext my-context
 .EXAMPLE
-   Remove-KubectlContext mycontext -ConfigurationFile ./kubeconfig
+   Remove-KubectlContext my-context -ConfigurationFile ./kubeconfig
 #>
 function Remove-KubectlContext {
     [CmdletBinding(SupportsShouldProcess = $True,
         ConfirmImpact = 'High')]
-    Param(
+    param(
         [Parameter(Mandatory = $True,
             Position = 0)]
         [string]
@@ -30,16 +30,16 @@ function Remove-KubectlContext {
         $ConfigurationFile = $null
     )
 
-    Process {
-        If (-not [System.String]::IsNullOrWhiteSpace($ConfigurationFile)) {
+    process {
+        if (-not [System.String]::IsNullOrWhiteSpace($ConfigurationFile)) {
             $configFileParameter = "--kubeconfig=`"$ConfigurationFile`""
         }
 
         $contextTable = (&kubectl config get-contexts --no-headers=true $configFileParameter).Split("`n")
         $contextTable | ForEach-Object {
             $contextLine = $_
-            If ($contextLine -match '\*?\s+(?<name>\S+)\s+(?<cluster>\S+)\s+(?<authinfo>\S+)' -and $Matches.name -eq $ContextName) {
-                If ($pscmdlet.ShouldProcess("$ContextName", "Remove kubectl context")) {
+            if ($contextLine -match '\*?\s+(?<name>\S+)\s+(?<cluster>\S+)\s+(?<authinfo>\S+)' -and $Matches.name -eq $ContextName) {
+                if ($pscmdlet.ShouldProcess("$ContextName", 'Remove kubectl context')) {
                     &kubectl config delete-context $Matches.name $configFileParameter
                     &kubectl config delete-cluster $Matches.cluster $configFileParameter
                     &kubectl config unset "users.$($Matches.authinfo)" $configFileParameter

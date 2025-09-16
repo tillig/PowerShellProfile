@@ -8,12 +8,12 @@
 #>
 function Reset-Source {
     [CmdletBinding()]
-    Param
+    param
     (
         [Parameter(Position = 0, ValueFromPipeline = $true)]
         [System.IO.DirectoryInfo[]] $Source
     )
-    Begin {
+    begin {
         Get-Command dotnet -ErrorAction Ignore | Out-Null
         if ($?) {
             & dotnet nuget locals -c all
@@ -26,7 +26,7 @@ function Reset-Source {
             throw 'Git not found on path. Unable to reset source.'
         }
     }
-    Process {
+    process {
         if ($NULL -eq $Source -or $Source.Length -eq 0) {
             & git clean -dfx
         }
