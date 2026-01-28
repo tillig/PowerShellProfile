@@ -223,6 +223,12 @@ function Open-GitRemote {
                 return $this.EncodeUri("$($GitInfo.WebViewBaseUrl)/-/commit/$($GitInfo.Hash)")
             }
         }
+        class GitHubCustomDomainGitProvider : GitHubGitProvider {
+            GitHubCustomDomainGitProvider() {
+                $this.Name = 'GitHub (Custom Domain)'
+                $this.HostMatch = '\bgithub\b'
+            }
+        }
         class GitLabCustomDomainGitProvider : GitLabGitProvider {
             GitLabCustomDomainGitProvider() {
                 $this.Name = 'GitLab (Custom Domain)'
@@ -255,6 +261,7 @@ function Open-GitRemote {
             [AzureDevOpsGitProvider]::new($True)
             [BitbucketServerGitProvider]::new()
             [GitLabCustomDomainGitProvider]::new()
+            [GitHubCustomDomainGitProvider]::new()
             [AzureDevOpsGitProvider]::new($False)
             [GiteaGitProvider]::new()
             [GerritGitProvider]::new()
