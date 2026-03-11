@@ -48,3 +48,58 @@ Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 ```
 
 I use the [Fira Code Nerd Font which includes glyphs and logos](https://github.com/ryanoasis/nerd-fonts) so if you see things not rendering right, that's why. Plain Windows Powershell running under the old school Windows console requires the Mono version of the font because it doesn't work well with glyphs. Consider Windows Terminal and/or PowerShell Core - on Windows those both support multi-character width glyphs.
+
+## Open-GitRemote Custom Host Mappings
+
+`Open-GitRemote` supports custom host regex mappings without editing the module source.
+
+The command reads mappings from:
+
+- `~/.config/powershell/Open-GitRemote.Providers.psd1`
+- `$Global:OpenGitRemoteProviderMappings`
+
+If both are present, `$Global:OpenGitRemoteProviderMappings` has a higher default priority.
+
+### Mapping Format
+
+Each mapping supports:
+
+- `Pattern` (required): Hostname regex.
+- `Provider` (required): Provider key. For GitHub/GitLab/etc. class or display names work (for example `GitHubGitProvider` or `GitHub`). Azure DevOps uses explicit keys listed below.
+- `Priority` (optional): Integer. Higher values match first.
+
+Azure DevOps mappings are explicitly disambiguated:
+
+- `AzureDevOps` / `Azure DevOps`: Modern `dev.azure.com` provider.
+- `AzureDevOpsLegacy` / `Azure DevOps Legacy`: Legacy `visualstudio.com` provider.
+
+### Example: Home Config File
+
+Create `~/.config/powershell/Open-GitRemote.Providers.psd1`:
+
+```powershell
+@{
+  Mappings = @(
+    @{
+      Pattern = 'my\.custom\.domain\.net'
+      Provider = 'GitHubGitProvider'
+    }
+  )
+}
+```
+
+### Example: Profile Override
+
+Add to your profile:
+
+```powershell
+$Global:OpenGitRemoteProviderMappings = @(
+  @{
+    Pattern = 'my\.custom\.domain\.net'
+    Provider = 'GitHub'
+    Priority = 300
+  }
+)
+```
+
+Invalid custom mappings are skipped with warnings so the command continues to use built-in providers.

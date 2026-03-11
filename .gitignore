@@ -4,6 +4,7 @@ Modules/**
 Reference/**
 Scripts/**
 .DS_Store
+Open-GitRemote.Providers.psd1
 
 !Modules/Illig
 !Modules/Illig/**
