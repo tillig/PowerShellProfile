@@ -44,7 +44,7 @@ function Get-Ruby {
                         'Active'   = $active
                         'Location' = $versionDir
                     }
-                    $rubyVersions += [pscustomobject]$rubyVersion
+                    $rubyVersions += [PSCustomObject]$rubyVersion
                 }
             }
         }
