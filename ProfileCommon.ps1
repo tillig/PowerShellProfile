@@ -1,4 +1,4 @@
-Import-Module VSSetup
+﻿Import-Module VSSetup
 Import-Module PSScriptAnalyzer
 Import-Module Pester
 Import-Module Terminal-Icons
@@ -124,7 +124,7 @@ if ((Get-Command brew -ErrorAction Ignore) -and (Test-Path ($completions = "$(br
 }
 
 # Bash completions in PowerShell
-$enableBashCompletions = ($Null -ne (Get-Command bash -ErrorAction Ignore)) -or ($Null -ne (Get-Command git -ErrorAction Ignore))
+$enableBashCompletions = ($env:DISABLE_BASH_COMPLETIONS) -and (($Null -ne (Get-Command bash -ErrorAction Ignore)) -or ($Null -ne (Get-Command git -ErrorAction Ignore)))
 if ($enableBashCompletions) {
     Import-Module PSBashCompletions
     $completionPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($profile), "bash-completion")
