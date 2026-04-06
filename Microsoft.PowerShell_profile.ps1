@@ -1,4 +1,4 @@
-﻿. $PSScriptRoot/ProfileCommon.ps1
+﻿. (Join-Path -Path $PSScriptRoot -ChildPath ProfileCommon.ps1)
 
 # oh-my-posh v3
 # This will run every time the prompt displays so it's important to keep it fast.

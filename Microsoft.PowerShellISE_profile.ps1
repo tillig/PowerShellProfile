@@ -1,4 +1,4 @@
-﻿. $PSScriptRoot/ProfileCommon.ps1
+﻿. (Join-Path -Path $PSScriptRoot -ChildPath ProfileCommon.ps1)
 
 #Script Browser Begin
 #Version: 1.3.2

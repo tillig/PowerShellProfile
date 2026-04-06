@@ -2,7 +2,7 @@
 # session startup hangs on the parallel prompt startup. Go super-simple.
 # Note the standard integrated prompt will use the regular profile and
 # may hang until you issue the first command and/or hit enter.
-& $PSScriptRoot/ProfileCommon.ps1
+& (Join-Path -Path $PSScriptRoot -ChildPath ProfileCommon.ps1)
 
 Set-Content Function:prompt {
     # Determine if the user is admin, so we color the prompt green or red.
