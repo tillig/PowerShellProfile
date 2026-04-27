@@ -7,10 +7,10 @@
         {
           "background": "#000000",
           "foreground": "#ff0000",
-          "powerline_symbol": "",
-          "properties": {
+          "options": {
             "always_enabled": false
           },
+          "powerline_symbol": "",
           "style": "powerline",
           "template": "[⌧ {{ if gt .Code 0 }} {{ .Meaning }}{{ else }}{{ end }}]",
           "type": "status"
@@ -18,10 +18,10 @@
         {
           "background": "#ff0000",
           "foreground": "#000000",
-          "powerline_symbol": "",
-          "properties": {
+          "options": {
             "root_icon": "☠"
           },
+          "powerline_symbol": "",
           "style": "powerline",
           "template": "  ",
           "type": "root"
@@ -37,10 +37,10 @@
         {
           "background": "#0000c0",
           "foreground": "#ffffff",
-          "powerline_symbol": "",
-          "properties": {
+          "options": {
             "style": "short"
           },
+          "powerline_symbol": "",
           "style": "powerline",
           "template": " 󰉋 {{ .Path }} ",
           "type": "path"
@@ -50,7 +50,7 @@
           "foreground": "#ffffff",
           "powerline_symbol": "",
           "style": "powerline",
-          "template": "{{ if .Env.LOCATION_STACK_DEPTH }}  {{ .Env.LOCATION_STACK_DEPTH }} {{ end }}",
+          "template": "{{ if .Env.LOCATION_STACK_DEPTH }}  {{ .Env.LOCATION_STACK_DEPTH }} {{ end }}",
           "type": "text"
         },
         {
@@ -58,17 +58,17 @@
           "foreground": "#ffffff",
           "powerline_symbol": "",
           "style": "powerline",
-          "template": "{{ if .Env.VSPROMPTVERSION }} ⌂ vs{{ .Env.VSPROMPTVERSION }} {{ end }}",
+          "template": "{{ if .Env.VSPROMPTVERSION }} 󰘐 vs{{ .Env.VSPROMPTVERSION }} {{ end }}",
           "type": "text"
         },
         {
           "background": "#00ffff",
           "foreground": "#000000",
-          "powerline_symbol": "",
-          "properties": {
+          "options": {
             "display_mode": "always",
             "home_enabled": true
           },
+          "powerline_symbol": "",
           "style": "powerline",
           "template": "  {{ if .Unsupported }}{{ else }}{{ .Full }}{{ end }} ",
           "type": "dotnet"
@@ -94,16 +94,16 @@
           "foreground": "#ffffff",
           "powerline_symbol": "",
           "style": "powerline",
-          "template": " {{ replaceP \"(.*).iam.gserviceaccount.com\" .Account \"$1\" }}",
+          "template": " {{ replaceP \"(.*).iam.gserviceaccount.com\" .Account \"$1\" }}",
           "type": "gcp"
         },
         {
           "background": "#00cc00",
           "foreground": "#000000",
-          "powerline_symbol": "",
-          "properties": {
+          "options": {
             "fetch_status": true
           },
+          "powerline_symbol": "",
           "style": "powerline",
           "template": " {{.Env.PRE_COMMIT_INSTALLED}}{{ .HEAD }} {{ .BranchStatus }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}} 󰆓 {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}}  {{ .WorktreeCount }}{{ end }} ",
           "type": "git"
@@ -117,7 +117,7 @@
       "segments": [
         {
           "foreground": "#ffffff",
-          "properties": {
+          "options": {
             "time_format": "15:04"
           },
           "style": "plain",
