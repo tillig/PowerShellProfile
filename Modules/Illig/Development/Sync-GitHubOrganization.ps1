@@ -29,6 +29,9 @@
     only for API calls, not for git clone/pull operations.
 .PARAMETER ApiEndpoint
     The GitHub API endpoint to use. Defaults to 'https://api.github.com'.
+.PARAMETER Force
+    Include archived repositories in the synchronization. By default, archived
+    repositories are skipped.
 .EXAMPLE
    Sync-GitHubOrganization -Organization "Autofac"
 .EXAMPLE
@@ -71,7 +74,11 @@ function Sync-GitHubOrganization {
         [Parameter(Mandatory = $False)]
         [string]
         [ValidateNotNullOrEmpty()]
-        $ApiEndpoint = 'https://api.github.com'
+        $ApiEndpoint = 'https://api.github.com',
+
+        [Parameter(Mandatory = $False)]
+        [switch]
+        $Force
     )
     begin {
         $git = Get-Command git -ErrorAction Ignore
@@ -144,6 +151,14 @@ function Sync-GitHubOrganization {
                 }
                 if ($included) {
                     $filteredRepos += $repo
+                }
+            }
+
+            if (-not $Force) {
+                $archivedCount = ($filteredRepos | Where-Object { $_.archived }).Count
+                $filteredRepos = @($filteredRepos | Where-Object { -not $_.archived })
+                if ($archivedCount -gt 0) {
+                    Write-Verbose "Skipping $archivedCount archived repo(s). Use -Force to include them."
                 }
             }
 
