@@ -1,12 +1,12 @@
-. (Join-Path -Path $PSScriptRoot -ChildPath ProfileCommon.ps1)
+﻿. (Join-Path -Path $PSScriptRoot -ChildPath ProfileCommon.ps1)
 
 # oh-my-posh v3
 # This will run every time the prompt displays so it's important to keep it fast.
 function Set-PromptContext {
     # Enable the git segment to indicate if pre-commit is installed.
-    If (Get-Command git -ErrorAction SilentlyContinue) {
+    if (Get-Command git -ErrorAction SilentlyContinue) {
         $repoRoot = git rev-parse --show-toplevel 2>&1
-        If ($LASTEXITCODE -eq 0) {
+        if ($LASTEXITCODE -eq 0) {
             $preCommitHook = Test-Path (Join-Path $repoRoot '.git' 'hooks' 'pre-commit')
             $env:PRE_COMMIT_INSTALLED = @{ $true = '✓'; $false = '' }[$preCommitHook]
         }
@@ -18,11 +18,11 @@ function Set-PromptContext {
 }
 
 Write-ProfileLog 'oh-my-posh initialization'
-If ($null -ne (Get-Command 'oh-my-posh' -ErrorAction Ignore)) {
+if ($null -ne (Get-Command 'oh-my-posh' -ErrorAction Ignore)) {
     oh-my-posh init pwsh --config $PSScriptRoot/themes/illig.json | Invoke-Expression
     New-Alias -Name 'Set-PromptContext' -Value 'Set-PromptContext' -Scope Global
 }
-Else {
+else {
     Write-Warning 'oh-my-posh not detected. Install to get the prompt: https://ohmyposh.dev/docs/'
     Write-Warning 'Falling back to script-based prompt. This is much slower than oh-my-posh.'
     Enable-ScriptBasedPrompt
@@ -50,7 +50,7 @@ if ($env:TERM_PROGRAM -eq 'iTerm.app') {
 }
 
 $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-If (Test-Path($ChocolateyProfile)) {
+if (Test-Path($ChocolateyProfile)) {
     Import-Module "$ChocolateyProfile"
 }
 

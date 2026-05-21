@@ -16,17 +16,17 @@ Write-ProfileLog 'Modules imported'
 
 # Windows defaults to ASCII; set UTF-8 and verify ANSI color support.
 Set-ConsoleEncoding -UTF8
-$Env:PYTHONIOENCODING = "UTF-8"
+$Env:PYTHONIOENCODING = 'UTF-8'
 Test-AnsiSupport | Out-Null
 
 # Azure Artifacts Credential Provider doesn't actually cache the token very long
 # unless you keep MSAL enabled.
 # https://developercommunity.visualstudio.com/t/azure-artifacts-credential-provider-unable-to-auth/1519587
 # https://github.com/microsoft/artifacts-credprovider/issues/234
-$Env:NUGET_CREDENTIALPROVIDER_MSAL_ENABLED = "true"
+$Env:NUGET_CREDENTIALPROVIDER_MSAL_ENABLED = 'true'
 
 # Update path settings for Windows-specific settings.
-If ($isDesktop -or $IsWindows) {
+if ($isDesktop -or $IsWindows) {
     Write-ProfileLog 'Windows-specific setup: Visual Studio dev prompt'
     # Import VS environment
     # As of VS 2019 16.2 there's a PowerShell module for developer VS prompt.
@@ -37,17 +37,17 @@ If ($isDesktop -or $IsWindows) {
     Write-ProfileLog 'Windows-specific setup: Visual Studio dev prompt complete'
 
     # Put the user paths before the machine paths so dotnet install overrides are possible.
-    $combined = [System.Collections.ArrayList][System.Environment]::GetEnvironmentVariable("PATH").Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
-    $userSegments = [System.Environment]::GetEnvironmentVariable("PATH", "User").Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
+    $combined = [System.Collections.ArrayList][System.Environment]::GetEnvironmentVariable('PATH').Split(';', [System.StringSplitOptions]::RemoveEmptyEntries)
+    $userSegments = [System.Environment]::GetEnvironmentVariable('PATH', 'User').Split(';', [System.StringSplitOptions]::RemoveEmptyEntries)
     $userSegments | ForEach-Object { $combined.Remove($_) }
     $combined.InsertRange(0, $userSegments)
-    [System.Environment]::SetEnvironmentVariable("PATH", ($combined -join ";"))
+    [System.Environment]::SetEnvironmentVariable('PATH', ($combined -join ';'))
 }
 
 # Fix double-wide XML icon in Terminal-Icons
 # https://github.com/devblackops/Terminal-Icons/issues/34
-If ($Null -ne (Get-Module Terminal-Icons)) {
-    Set-TerminalIconsIcon -Glyph "nf-mdi-xml" -NewGlyph "nf-mdi-file_xml"
+if ($Null -ne (Get-Module Terminal-Icons)) {
+    Set-TerminalIconsIcon -Glyph 'nf-mdi-xml' -NewGlyph 'nf-mdi-file_xml'
 }
 
 # Aliases
@@ -55,9 +55,9 @@ Set-Alias -Name which -Value Get-Command
 
 # MacOS/dotnet fix - some dotnet global commands require DOTNET_HOST_PATH but
 # that doesn't always get set by the dotnet CLI.
-$dotnetLocation = Get-Command "dotnet" -ErrorAction Ignore
+$dotnetLocation = Get-Command 'dotnet' -ErrorAction Ignore
 if ($null -ne $dotnetLocation) {
-    [System.Environment]::SetEnvironmentVariable("DOTNET_HOST_PATH", $dotnetLocation.Source)
+    [System.Environment]::SetEnvironmentVariable('DOTNET_HOST_PATH', $dotnetLocation.Source)
 }
 
 # Chocolatey profile
@@ -69,7 +69,7 @@ if ($isDesktop -or $IsWindows) {
 }
 
 # Homebrew settings
-if ($IsMacOS -and ($null -ne (Get-Command "brew" -ErrorAction Ignore))) {
+if ($IsMacOS -and ($null -ne (Get-Command 'brew' -ErrorAction Ignore))) {
     Write-ProfileLog 'Homebrew shell environment'
     $brewPrefix = & brew --prefix
     $(brew shellenv) | Invoke-Expression
@@ -78,9 +78,9 @@ if ($IsMacOS -and ($null -ne (Get-Command "brew" -ErrorAction Ignore))) {
 
 
 # nvs auto version switching - https://github.com/jasongin/nvs
-if ($null -ne (Get-Command "nvs" -ErrorAction Ignore)) {
+if ($null -ne (Get-Command 'nvs' -ErrorAction Ignore)) {
     Write-ProfileLog 'nvs auto version switching'
-    if (Test-Path "~/.nvmrc") {
+    if (Test-Path '~/.nvmrc') {
         nvs use auto | Out-Null
     }
 
@@ -103,7 +103,7 @@ if ($?) {
 
 # PowerShell native completions
 Write-ProfileLog 'Native completions (helm, istioctl, k9s, kubectl, etc.)'
-@("crane", "helm", "istioctl", "k9s", "kubectl", "minikube", "oras", "skopeo") | ForEach-Object {
+@('crane', 'helm', 'istioctl', 'k9s', 'kubectl', 'minikube', 'oras', 'skopeo') | ForEach-Object {
     $command = $_
     if (Get-Command $command -ErrorAction SilentlyContinue) {
         Write-ProfileLog "  Generating completions for $command"
@@ -115,7 +115,7 @@ Write-ProfileLog 'Native completions complete'
 
 # az CLI
 # https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli&pivots=winget#enable-tab-completion-in-powershell
-if ($null -ne (Get-Command "az" -ErrorAction Ignore)) {
+if ($null -ne (Get-Command 'az' -ErrorAction Ignore)) {
     Write-ProfileLog 'az CLI completion registration'
     Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
         param($commandName, $wordToComplete, $cursorPosition)
@@ -155,8 +155,8 @@ $enableBashCompletions = ([String]::IsNullOrEmpty($env:DISABLE_BASH_COMPLETIONS)
 if ($enableBashCompletions) {
     Write-ProfileLog 'Bash completions'
     Import-Module PSBashCompletions
-    $completionPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($profile), "bash-completion")
-    Get-ChildItem $completionPath -Exclude ".editorconfig" | ForEach-Object {
+    $completionPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($profile), 'bash-completion')
+    Get-ChildItem $completionPath -Exclude '.editorconfig' | ForEach-Object {
         $completerFullPath = $_.FullName
         $completerCommandName = $_.Name
         if (Get-Command $completerCommandName -ErrorAction SilentlyContinue) {
@@ -169,5 +169,5 @@ if ($enableBashCompletions) {
 # Set kubectl editor to VS Code if it's present.
 Get-Command code -ErrorAction Ignore | Out-Null
 if ($?) {
-    $Env:KUBE_EDITOR = "code --wait"
+    $Env:KUBE_EDITOR = 'code --wait'
 }

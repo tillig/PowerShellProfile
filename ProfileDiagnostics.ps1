@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Profile startup diagnostics with timing information.
 .DESCRIPTION
