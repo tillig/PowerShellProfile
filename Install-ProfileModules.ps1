@@ -1,11 +1,15 @@
-$releaseModules = @(
-    "Microsoft.Graph",
-    "posh-git",
+﻿$releaseModules = @(
+    # Common for all OSes.
     "PSBashCompletions",
-    "VSSetup",
     "PSScriptAnalyzer",
     "Pester",
-    "Terminal-Icons"
+    "Terminal-Icons",
+
+    # Used for script-based prompt when oh-my-posh is not available.
+    "posh-git",
+
+    # Used only on Windows.
+    "VSSetup"
 )
 
 $preReleaseModules = @(
