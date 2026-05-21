@@ -2,12 +2,15 @@
 Initialize-ProfileDiagnostics
 
 Write-ProfileLog 'Importing common modules'
-Import-Module git-completion
-Import-Module PSScriptAnalyzer
-Import-Module Pester
-Import-Module Terminal-Icons
-Import-Module Illig
+@('git-completion', 'PSScriptAnalyzer', 'Pester', 'Terminal-Icons', 'Illig') | ForEach-Object {
+    $moduleName = $_
+    Write-ProfileLog "  Importing $moduleName"
+    Import-Module $moduleName -ErrorAction Stop
+    Write-ProfileLog "  Imported $moduleName"
+}
+
 Write-ProfileLog 'Common modules imported'
+
 if ($isDesktop -or $IsWindows) {
     Write-ProfileLog 'Importing Windows-specific modules'
     Import-Module VSSetup
