@@ -1,8 +1,13 @@
-﻿Import-Module VSSetup
-Import-Module PSScriptAnalyzer
-Import-Module Pester
-Import-Module Terminal-Icons
+. (Join-Path -Path $PSScriptRoot -ChildPath ProfileDiagnostics.ps1)
+Initialize-ProfileDiagnostics
+
+Write-ProfileLog 'Importing modules'
+Import-Module VSSetup -ErrorAction SilentlyContinue
+Import-Module PSScriptAnalyzer -ErrorAction SilentlyContinue
+Import-Module Pester -ErrorAction SilentlyContinue
+Import-Module Terminal-Icons -ErrorAction SilentlyContinue
 Import-Module Illig
+Write-ProfileLog 'Modules imported'
 
 # Paths: Put user-specific paths in the OS location for that.
 # - On Windows, System/Advanced System Settings/Environment Variables
@@ -22,12 +27,14 @@ $Env:NUGET_CREDENTIALPROVIDER_MSAL_ENABLED = "true"
 
 # Update path settings for Windows-specific settings.
 If ($isDesktop -or $IsWindows) {
+    Write-ProfileLog 'Windows-specific setup: Visual Studio dev prompt'
     # Import VS environment
     # As of VS 2019 16.2 there's a PowerShell module for developer VS prompt.
     # However, it is NOT compatible with PowerShell Core.
     # Instance ID can be found when locating the VS install information.
     # C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe -NoExit -Command "& { Import-Module .\Common7\Tools\vsdevshell\Microsoft.VisualStudio.DevShell.dll; Enter-VsDevShell -InstanceId 5a7ac072}"
     Invoke-VisualStudioDevPrompt
+    Write-ProfileLog 'Windows-specific setup: Visual Studio dev prompt complete'
 
     # Put the user paths before the machine paths so dotnet install overrides are possible.
     $combined = [System.Collections.ArrayList][System.Environment]::GetEnvironmentVariable("PATH").Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
@@ -63,69 +70,87 @@ if ($isDesktop -or $IsWindows) {
 
 # Homebrew settings
 if ($IsMacOS -and ($null -ne (Get-Command "brew" -ErrorAction Ignore))) {
+    Write-ProfileLog 'Homebrew shell environment'
+    $brewPrefix = & brew --prefix
     $(brew shellenv) | Invoke-Expression
+    Write-ProfileLog 'Homebrew shell environment complete'
 }
 
 
 # nvs auto version switching - https://github.com/jasongin/nvs
 if ($null -ne (Get-Command "nvs" -ErrorAction Ignore)) {
+    Write-ProfileLog 'nvs auto version switching'
     if (Test-Path "~/.nvmrc") {
         nvs use auto | Out-Null
     }
 
     nvs auto on
+    Write-ProfileLog 'nvs auto version switching complete'
 }
 
 # PowerShell parameter completion shim for the dotnet CLI
 Get-Command dotnet -ErrorAction Ignore | Out-Null
 if ($?) {
+    Write-ProfileLog 'dotnet completion registration'
     Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock {
         param($commandName, $wordToComplete, $cursorPosition)
         dotnet complete --position $cursorPosition "$wordToComplete" | ForEach-Object {
             [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }
     }
+    Write-ProfileLog 'dotnet completion registration complete'
 }
 
 # PowerShell native completions
+Write-ProfileLog 'Native completions (helm, istioctl, k9s, kubectl)'
 @("helm", "istioctl", "k9s", "kubectl") | ForEach-Object {
     $command = $_
     if (Get-Command $command -ErrorAction SilentlyContinue) {
+        Write-ProfileLog "  Generating completions for $command"
         & $command completion powershell | Out-String | Invoke-Expression
+        Write-ProfileLog "  Completions for $command complete"
     }
 }
+Write-ProfileLog 'Native completions complete'
 
 # az CLI
 # https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli&pivots=winget#enable-tab-completion-in-powershell
-Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
-    param($commandName, $wordToComplete, $cursorPosition)
-    $completion_file = New-TemporaryFile
-    $env:ARGCOMPLETE_USE_TEMPFILES = 1
-    $env:_ARGCOMPLETE_STDOUT_FILENAME = $completion_file
-    $env:COMP_LINE = $wordToComplete
-    $env:COMP_POINT = $cursorPosition
-    $env:_ARGCOMPLETE = 1
-    $env:_ARGCOMPLETE_SUPPRESS_SPACE = 0
-    $env:_ARGCOMPLETE_IFS = "`n"
-    $env:_ARGCOMPLETE_SHELL = 'powershell'
-    az 2>&1 | Out-Null
-    Get-Content $completion_file | Sort-Object | ForEach-Object {
-        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+if ($null -ne (Get-Command "az" -ErrorAction Ignore)) {
+    Write-ProfileLog 'az CLI completion registration'
+    Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
+        param($commandName, $wordToComplete, $cursorPosition)
+        $completion_file = New-TemporaryFile
+        $env:ARGCOMPLETE_USE_TEMPFILES = 1
+        $env:_ARGCOMPLETE_STDOUT_FILENAME = $completion_file
+        $env:COMP_LINE = $wordToComplete
+        $env:COMP_POINT = $cursorPosition
+        $env:_ARGCOMPLETE = 1
+        $env:_ARGCOMPLETE_SUPPRESS_SPACE = 0
+        $env:_ARGCOMPLETE_IFS = "`n"
+        $env:_ARGCOMPLETE_SHELL = 'powershell'
+        az 2>&1 | Out-Null
+        Get-Content $completion_file | Sort-Object | ForEach-Object {
+            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        }
+        Remove-Item $completion_file, Env:\_ARGCOMPLETE_STDOUT_FILENAME, Env:\ARGCOMPLETE_USE_TEMPFILES, Env:\COMP_LINE, Env:\COMP_POINT, Env:\_ARGCOMPLETE, Env:\_ARGCOMPLETE_SUPPRESS_SPACE, Env:\_ARGCOMPLETE_IFS, Env:\_ARGCOMPLETE_SHELL
     }
-    Remove-Item $completion_file, Env:\_ARGCOMPLETE_STDOUT_FILENAME, Env:\ARGCOMPLETE_USE_TEMPFILES, Env:\COMP_LINE, Env:\COMP_POINT, Env:\_ARGCOMPLETE, Env:\_ARGCOMPLETE_SUPPRESS_SPACE, Env:\_ARGCOMPLETE_IFS, Env:\_ARGCOMPLETE_SHELL
+    Write-ProfileLog 'az CLI completion registration complete'
 }
 
 # For commands installed by Homebrew that also generate Powershell completions, register those.
 # https://docs.brew.sh/Shell-Completion
-if ((Get-Command brew -ErrorAction Ignore) -and (Test-Path ($completions = "$(brew --prefix)/share/pwsh/completions"))) {
+if ($null -ne $brewPrefix -and (Test-Path ($completions = "$brewPrefix/share/pwsh/completions"))) {
+    Write-ProfileLog 'Homebrew PowerShell completions'
     foreach ($f in Get-ChildItem -Path $completions -File) {
         . $f
     }
+    Write-ProfileLog 'Homebrew PowerShell completions complete'
 }
 
 # Bash completions in PowerShell
 $enableBashCompletions = ([String]::IsNullOrEmpty($env:DISABLE_BASH_COMPLETIONS)) -and (($Null -ne (Get-Command bash -ErrorAction Ignore)) -or ($Null -ne (Get-Command git -ErrorAction Ignore)))
 if ($enableBashCompletions) {
+    Write-ProfileLog 'Bash completions'
     Import-Module PSBashCompletions
     $completionPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($profile), "bash-completion")
     Get-ChildItem $completionPath -Exclude ".editorconfig" | ForEach-Object {
@@ -133,6 +158,7 @@ if ($enableBashCompletions) {
         $completerCommandName = $_.Name
         Register-BashArgumentCompleter $completerCommandName "$completerFullPath"
     }
+    Write-ProfileLog 'Bash completions complete'
 }
 
 # Set kubectl editor to VS Code if it's present.

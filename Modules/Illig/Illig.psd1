@@ -58,5 +58,6 @@
     )
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules   = @('VSSetup')
+    # VSSetup is only relevant on Windows; loaded conditionally in ProfileCommon.ps1
+    RequiredModules   = @()
 }
