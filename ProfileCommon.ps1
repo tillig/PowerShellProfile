@@ -3,7 +3,7 @@ Initialize-ProfileDiagnostics
 
 Write-ProfileLog 'Importing common modules'
 # Don't import PSScriptAnalyzer or Pester - these will get auto-imported on usage.
-@('git-completion', 'Terminal-Icons', 'Illig') | ForEach-Object {
+@('Terminal-Icons', 'Illig') | ForEach-Object {
     $moduleName = $_
     Write-ProfileLog "  Importing $moduleName"
     Import-Module $moduleName -ErrorAction Stop
@@ -110,6 +110,20 @@ if ($?) {
     }
     Write-ProfileLog 'dotnet completion registration complete'
 }
+
+# Lazy-load git-completion: register a placeholder completer that imports the
+# module on first Tab, then re-invokes completion so results appear immediately.
+# After this runs once, the real git-completion completer will be registered and
+# this placeholder will be ignored.
+Write-ProfileLog 'Registering deferred git-completion'
+Register-ArgumentCompleter -Native -CommandName git -ScriptBlock {
+    param($wordToComplete, $commandAst, $cursorPosition)
+    Import-Module git-completion -Global
+    $line = $commandAst.ToString()
+    $result = [System.Management.Automation.CommandCompletion]::CompleteInput($line, $cursorPosition, $null)
+    $result.CompletionMatches
+}
+Write-ProfileLog 'Deferred git-completion registered'
 
 # PowerShell native completions
 Write-ProfileLog 'Native completions (helm, istioctl, k9s, kubectl, etc.)'
