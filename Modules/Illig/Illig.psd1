@@ -41,6 +41,7 @@
         'Remove-TempFiles',
         'Reset-Ruby',
         'Reset-Source',
+        'Save-NuGetPackage',
         'Select-VsInstall',
         'Set-ConsoleEncoding',
         'Set-DotEnv',

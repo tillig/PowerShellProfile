@@ -13,6 +13,7 @@
 . $PSScriptRoot\Development\Remove-TempFiles.ps1
 . $PSScriptRoot\Development\Reset-Ruby.ps1
 . $PSScriptRoot\Development\Reset-Source.ps1
+. $PSScriptRoot\Development\Save-NuGetPackage.ps1
 . $PSScriptRoot\Development\Set-DotEnv.ps1
 . $PSScriptRoot\Development\Sync-AzureDevOpsProject.ps1
 . $PSScriptRoot\Development\Sync-GitHubOrganization.ps1
