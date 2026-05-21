@@ -1,16 +1,18 @@
 ﻿. (Join-Path -Path $PSScriptRoot -ChildPath ProfileDiagnostics.ps1)
 Initialize-ProfileDiagnostics
 
-Write-ProfileLog 'Importing modules'
+Write-ProfileLog 'Importing common modules'
 Import-Module git-completion
 Import-Module PSScriptAnalyzer
 Import-Module Pester
 Import-Module Terminal-Icons
 Import-Module Illig
+Write-ProfileLog 'Common modules imported'
 if ($isDesktop -or $IsWindows) {
+    Write-ProfileLog 'Importing Windows-specific modules'
     Import-Module VSSetup
+    Write-ProfileLog 'Windows-specific modules imported'
 }
-Write-ProfileLog 'Modules imported'
 
 # Paths: Put user-specific paths in the OS location for that.
 # - On Windows, System/Advanced System Settings/Environment Variables
