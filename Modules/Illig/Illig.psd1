@@ -1,4 +1,4 @@
-@{
+﻿@{
 
     # Script module or binary module file associated with this manifest.
     RootModule        = 'Illig.psm1'
@@ -58,6 +58,5 @@
     )
 
     # Modules that must be imported into the global environment prior to importing this module
-    # VSSetup is only relevant on Windows; loaded conditionally in ProfileCommon.ps1
     RequiredModules   = @()
 }
