@@ -150,7 +150,7 @@ if ($null -ne (Get-Command "az" -ErrorAction Ignore)) {
 #     Write-ProfileLog 'Homebrew PowerShell completions complete'
 # }
 
-# Bash completions in PowerShell
+# Bash completions in PowerShell - only register if the command is found.
 $enableBashCompletions = ([String]::IsNullOrEmpty($env:DISABLE_BASH_COMPLETIONS)) -and (($Null -ne (Get-Command bash -ErrorAction Ignore)) -or ($Null -ne (Get-Command git -ErrorAction Ignore)))
 if ($enableBashCompletions) {
     Write-ProfileLog 'Bash completions'
@@ -159,7 +159,9 @@ if ($enableBashCompletions) {
     Get-ChildItem $completionPath -Exclude ".editorconfig" | ForEach-Object {
         $completerFullPath = $_.FullName
         $completerCommandName = $_.Name
-        Register-BashArgumentCompleter $completerCommandName "$completerFullPath"
+        if (Get-Command $completerCommandName -ErrorAction SilentlyContinue) {
+            Register-BashArgumentCompleter $completerCommandName "$completerFullPath"
+        }
     }
     Write-ProfileLog 'Bash completions complete'
 }
