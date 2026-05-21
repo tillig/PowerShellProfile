@@ -1,5 +1,6 @@
 ﻿$releaseModules = @(
     # Common for all OSes.
+    'git-completion',
     'PSBashCompletions',
     'PSScriptAnalyzer',
     'Pester',

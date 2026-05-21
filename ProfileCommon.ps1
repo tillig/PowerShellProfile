@@ -2,11 +2,14 @@
 Initialize-ProfileDiagnostics
 
 Write-ProfileLog 'Importing modules'
-Import-Module VSSetup -ErrorAction SilentlyContinue
-Import-Module PSScriptAnalyzer -ErrorAction SilentlyContinue
-Import-Module Pester -ErrorAction SilentlyContinue
-Import-Module Terminal-Icons -ErrorAction SilentlyContinue
+Import-Module git-completion
+Import-Module PSScriptAnalyzer
+Import-Module Pester
+Import-Module Terminal-Icons
 Import-Module Illig
+if ($isDesktop -or $IsWindows) {
+    Import-Module VSSetup
+}
 Write-ProfileLog 'Modules imported'
 
 # Paths: Put user-specific paths in the OS location for that.
