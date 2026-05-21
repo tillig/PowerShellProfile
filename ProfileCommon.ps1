@@ -2,7 +2,8 @@
 Initialize-ProfileDiagnostics
 
 Write-ProfileLog 'Importing common modules'
-@('git-completion', 'PSScriptAnalyzer', 'Pester', 'Terminal-Icons', 'Illig') | ForEach-Object {
+# Don't import PSScriptAnalyzer or Pester - these will get auto-imported on usage.
+@('git-completion', 'Terminal-Icons', 'Illig') | ForEach-Object {
     $moduleName = $_
     Write-ProfileLog "  Importing $moduleName"
     Import-Module $moduleName -ErrorAction Stop
