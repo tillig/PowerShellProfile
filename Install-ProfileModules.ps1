@@ -7,10 +7,7 @@
     'Terminal-Icons',
 
     # Used for script-based prompt when oh-my-posh is not available.
-    'posh-git',
-
-    # Used only on Windows.
-    'VSSetup'
+    'posh-git'
 )
 
 $preReleaseModules = @(

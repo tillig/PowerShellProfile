@@ -1,7 +1,7 @@
 ﻿. (Join-Path -Path $PSScriptRoot -ChildPath ProfileDiagnostics.ps1)
 Initialize-ProfileDiagnostics
 
-Write-ProfileLog 'Importing common modules'
+Write-ProfileLog 'Importing modules'
 # Don't import PSScriptAnalyzer or Pester - these will get auto-imported on usage.
 @('Terminal-Icons', 'Illig') | ForEach-Object {
     $moduleName = $_
@@ -10,13 +10,7 @@ Write-ProfileLog 'Importing common modules'
     Write-ProfileLog "  Imported $moduleName"
 }
 
-Write-ProfileLog 'Common modules imported'
-
-if ($isDesktop -or $IsWindows) {
-    Write-ProfileLog 'Importing Windows-specific modules'
-    Import-Module VSSetup
-    Write-ProfileLog 'Windows-specific modules imported'
-}
+Write-ProfileLog 'Modules imported'
 
 # Paths: Put user-specific paths in the OS location for that.
 # - On Windows, System/Advanced System Settings/Environment Variables
@@ -36,15 +30,6 @@ $Env:NUGET_CREDENTIALPROVIDER_MSAL_ENABLED = 'true'
 
 # Update path settings for Windows-specific settings.
 if ($isDesktop -or $IsWindows) {
-    Write-ProfileLog 'Windows-specific setup: Visual Studio dev prompt'
-    # Import VS environment
-    # As of VS 2019 16.2 there's a PowerShell module for developer VS prompt.
-    # However, it is NOT compatible with PowerShell Core.
-    # Instance ID can be found when locating the VS install information.
-    # C:\Windows\SysWOW64\WindowsPowerShell\v1.0\powershell.exe -NoExit -Command "& { Import-Module .\Common7\Tools\vsdevshell\Microsoft.VisualStudio.DevShell.dll; Enter-VsDevShell -InstanceId 5a7ac072}"
-    Invoke-VisualStudioDevPrompt
-    Write-ProfileLog 'Windows-specific setup: Visual Studio dev prompt complete'
-
     # Put the user paths before the machine paths so dotnet install overrides are possible.
     $combined = [System.Collections.ArrayList][System.Environment]::GetEnvironmentVariable('PATH').Split(';', [System.StringSplitOptions]::RemoveEmptyEntries)
     $userSegments = [System.Environment]::GetEnvironmentVariable('PATH', 'User').Split(';', [System.StringSplitOptions]::RemoveEmptyEntries)
