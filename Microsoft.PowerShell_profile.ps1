@@ -20,7 +20,7 @@ function Set-PromptContext {
 Write-ProfileLog 'oh-my-posh initialization'
 if ($null -ne (Get-Command 'oh-my-posh' -ErrorAction Ignore)) {
     oh-my-posh init pwsh --config $PSScriptRoot/themes/illig.json | Invoke-Expression
-    New-Alias -Name 'Set-PromptContext' -Value 'Set-PromptContext' -Scope Global
+    New-Alias -Name 'Set-PoshContext' -Value 'Set-PromptContext' -Scope Global
 }
 else {
     Write-Warning 'oh-my-posh not detected. Install to get the prompt: https://ohmyposh.dev/docs/'
