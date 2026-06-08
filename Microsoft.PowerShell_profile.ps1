@@ -15,6 +15,15 @@ function Set-PromptContext {
     # Enable the pushd/popd stack depth to be displayed.
     $stackDepth = (Get-Location -Stack).Count
     $env:LOCATION_STACK_DEPTH = @{ $true = ''; $false = "$stackDepth" }[0 -eq $stackDepth]
+
+    # Enable iTerm2 integration if running in iTerm2. This allows iTerm2 to show
+    # the current directory and remote host in the title bar.    if
+    # ($env:TERM_PROGRAM -eq 'iTerm.app') {
+    if ($env:TERM_PROGRAM -eq 'iTerm.app') {
+        $dir = $PWD.ProviderPath
+        [Console]::Write("`e]1337;CurrentDir=$dir`a")
+        [Console]::Write("`e]1337;RemoteHost=$env:USER@$(hostname)`a")
+    }
 }
 
 Write-ProfileLog 'oh-my-posh initialization'
@@ -28,26 +37,6 @@ else {
     Enable-ScriptBasedPrompt
 }
 Write-ProfileLog 'oh-my-posh initialization complete'
-
-# Enable iTerm2 integration if running in iTerm2. This allows iTerm2 to show the
-# current directory and remote host in the title bar. Must be done after
-# oh-my-posh is initialized to ensure the prompt function is defined, but also
-# to ensure the console output isn't captured/redirected by the prompt function.
-# This is a bit hacky but iTerm2 doesn't provide a better way to do this.
-if ($env:TERM_PROGRAM -eq 'iTerm.app') {
-    $Global:__iterm2OriginalPrompt = $function:prompt
-    function Global:prompt {
-        # Report current context to iTerm2
-        $dir = $PWD.ProviderPath
-        [Console]::Write("`e]1337;CurrentDir=$dir`a")
-        [Console]::Write("`e]1337;RemoteHost=$env:USER@$(hostname)`a")
-
-        # Call the original prompt (oh-my-posh or whatever is configured)
-        if ($Global:__iterm2OriginalPrompt) {
-            & $Global:__iterm2OriginalPrompt
-        }
-    }
-}
 
 $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 if (Test-Path($ChocolateyProfile)) {
