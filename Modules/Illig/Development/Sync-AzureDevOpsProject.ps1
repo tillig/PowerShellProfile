@@ -89,7 +89,7 @@ function Sync-AzureDevOpsProject {
 
             # Not using Update-GitRepository because we need to separate the git pull from the removal of local branches.
             Write-Verbose 'Updating repository clones.'
-            $repos | ForEach-Object -ThrottleLimit 10 -Parallel {
+            $repos | Sort-Object name | ForEach-Object -ThrottleLimit 10 -Parallel {
                 $repo = $_
                 $repoName = $repo.name
                 $currentFolders = $using:currentFolders
