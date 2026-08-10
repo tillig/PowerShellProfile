@@ -5,7 +5,8 @@
     "lastexitcode",
     "powerline",
     "rubygems",
-    "rubyopt"
+    "rubyopt",
+    "worktree"
   ],
   "files.watcherExclude": {
     "**/target": true
