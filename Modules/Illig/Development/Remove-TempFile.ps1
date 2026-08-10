@@ -4,9 +4,9 @@
 .DESCRIPTION
    Removes temporary files from the current user and temporary ASP.NET files.
 .EXAMPLE
-   Remove-TempFiles
+   Remove-TempFile
 #>
-function Remove-TempFiles {
+function Remove-TempFile {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (

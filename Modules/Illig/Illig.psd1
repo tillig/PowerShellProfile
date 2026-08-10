@@ -37,7 +37,7 @@
         'Optimize-PSReadlineHistory',
         'Remove-GitLocalOnly',
         'Remove-KubectlContext',
-        'Remove-TempFiles',
+        'Remove-TempFile',
         'Reset-Ruby',
         'Reset-Source',
         'Save-NuGetPackage',

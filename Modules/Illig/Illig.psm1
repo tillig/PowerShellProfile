@@ -10,7 +10,7 @@
 . $PSScriptRoot\Development\New-MachineKey.ps1
 . $PSScriptRoot\Development\Open-GitRemote.ps1
 . $PSScriptRoot\Development\Remove-GitLocalOnly.ps1
-. $PSScriptRoot\Development\Remove-TempFiles.ps1
+. $PSScriptRoot\Development\Remove-TempFile.ps1
 . $PSScriptRoot\Development\Reset-Ruby.ps1
 . $PSScriptRoot\Development\Reset-Source.ps1
 . $PSScriptRoot\Development\Save-NuGetPackage.ps1
