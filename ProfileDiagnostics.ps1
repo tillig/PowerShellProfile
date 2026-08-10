@@ -20,6 +20,9 @@ $Global:__ProfileDiagnostics = @{
 
 function Initialize-ProfileDiagnostics {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseSingularNouns', '',
+        Justification = 'Diagnostics is a mass noun; the singular form reads wrong.')]
     param()
 
     $enabled = $env:PROFILE_DIAGNOSTICS
@@ -51,6 +54,12 @@ function Write-ProfileLog {
 
 function Complete-ProfileDiagnostics {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseSingularNouns', '',
+        Justification = 'Diagnostics is a mass noun; the singular form reads wrong.')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '',
+        Justification = 'Reports the log location to the interactive host at startup.')]
     param()
 
     if (-not $Global:__ProfileDiagnostics.Enabled) {
