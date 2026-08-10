@@ -7,7 +7,7 @@
    Reset-Source
 #>
 function Reset-Source {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $True)]
     param
     (
         [Parameter(Position = 0, ValueFromPipeline = $true)]
@@ -16,7 +16,9 @@ function Reset-Source {
     begin {
         Get-Command dotnet -ErrorAction Ignore | Out-Null
         if ($?) {
-            & dotnet nuget locals -c all
+            if ($PSCmdlet.ShouldProcess('NuGet local caches', 'Clear')) {
+                & dotnet nuget locals -c all
+            }
         }
         else {
             Write-Warning 'dotnet CLI not found on path. Unable to clear NuGet cache.'
@@ -28,10 +30,15 @@ function Reset-Source {
     }
     process {
         if ($NULL -eq $Source -or $Source.Length -eq 0) {
-            & git clean -dfx
+            if ($PSCmdlet.ShouldProcess($PWD, 'Clean untracked and ignored files')) {
+                & git clean -dfx
+            }
         }
         else {
             foreach ($path in $Source) {
+                if (-not $PSCmdlet.ShouldProcess($path, 'Clean untracked and ignored files')) {
+                    continue
+                }
                 Push-Location $path
                 & git clean -dfx
                 Pop-Location

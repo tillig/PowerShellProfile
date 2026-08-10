@@ -13,7 +13,7 @@
    Get-ChildItem -Directory | Update-GitRepository
 #>
 function Update-GitRepository {
-    [CmdletBinding(SupportsShouldProcess = $False)]
+    [CmdletBinding(SupportsShouldProcess = $True)]
     param(
         [Parameter(Mandatory = $False,
             Position = 0,
@@ -34,6 +34,9 @@ function Update-GitRepository {
     process {
         if (-not (Test-Path $Path)) {
             throw "Unable to find path $Path"
+        }
+        if (-not $PSCmdlet.ShouldProcess($Path, 'Pull and prune Git branches')) {
+            return
         }
         try {
             Write-Progress -Activity 'Updating Git repositories' -Status $Path

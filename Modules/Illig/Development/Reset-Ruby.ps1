@@ -12,7 +12,7 @@
     Reset-Ruby
 #>
 function Reset-Ruby {
-    [CmdletBinding(SupportsShouldProcess = $False)]
+    [CmdletBinding(SupportsShouldProcess = $True)]
     param(
     )
 
@@ -21,12 +21,15 @@ function Reset-Ruby {
         if ($IsWindows) {
             $pathSeparator = ';'
         }
-
     }
 
     process {
         # RUBY_ROOT gets set by Enable-Ruby and signifies other environment variables will be present.
         if (-not $Env:RUBY_ROOT) {
+            return
+        }
+
+        if (-not $PSCmdlet.ShouldProcess('Ruby environment variables and PATH', 'Reset to system defaults')) {
             return
         }
 

@@ -11,7 +11,7 @@
    Set-ConsoleEncoding -UTF8
 #>
 function Set-ConsoleEncoding {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $True)]
     param
     (
         [Parameter(ParameterSetName = 'Unicode')]
@@ -23,11 +23,15 @@ function Set-ConsoleEncoding {
         $Default
     )
     process {
-        if ($Default) {
-            [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding(437)
+        if ($UTF8 -or -not $Default) {
+            $encoding = [System.Text.Encoding]::UTF8
         }
         else {
-            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $encoding = [System.Text.Encoding]::GetEncoding(437)
+        }
+
+        if ($PSCmdlet.ShouldProcess('console output encoding', "Set to $($encoding.EncodingName)")) {
+            [Console]::OutputEncoding = $encoding
         }
     }
 }
