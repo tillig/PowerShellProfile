@@ -1,24 +1,31 @@
-﻿$releaseModules = @(
-    # Common for all OSes.
-    'git-completion',
-    'PSBashCompletions',
-    'PSScriptAnalyzer',
-    'Pester',
-    'Terminal-Icons',
+﻿# Each module is a hashtable with a Name and optional AllowPrerelease / RequiredVersion.
+$modules = @(
+    @{ Name = 'git-completion' },
+    @{ Name = 'Pester' },
+    @{ Name = 'posh-git' },
+    @{ Name = 'PSBashCompletions' },
+    @{ Name = 'Terminal-Icons' },
 
-    # Used for script-based prompt when oh-my-posh is not available.
-    'posh-git'
-)
+    # Pinned - the PowerShell extension for VS Code doesn't work with 1.25.0.
+    @{ Name = 'PSScriptAnalyzer'; RequiredVersion = '1.24.0' }
+ )
 
-$preReleaseModules = @(
-)
+Write-Host 'Installing modules - watch for warnings, you may need to install a module and include -Force to get side-by-side support.'
+$modules | ForEach-Object {
+    $installParams = @{
+        Name         = $_.Name
+        Scope        = 'CurrentUser'
+        AllowClobber = $true
+        Force        = $true
+    }
 
-Write-Host 'Installing release modules - watch for warnings, you may need to install a module and include -Force to get side-by-side support.'
-$releaseModules | ForEach-Object {
-    Install-Module $_ -Scope CurrentUser -AllowClobber -Force
-}
+    if ($_.AllowPrerelease) {
+        $installParams.AllowPrerelease = $true
+    }
 
-Write-Host 'Installing prerelease modules - watch for warnings, you may need to install a module and include -Force to get side-by-side support.'
-$preReleaseModules | ForEach-Object {
-    Install-Module $_ -Scope CurrentUser -AllowClobber -AllowPrerelease -Force
+    if ($_.RequiredVersion) {
+        $installParams.RequiredVersion = $_.RequiredVersion
+    }
+
+    Install-Module @installParams
 }
