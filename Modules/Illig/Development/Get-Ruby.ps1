@@ -17,6 +17,7 @@
 #>
 function Get-Ruby {
     [CmdletBinding(SupportsShouldProcess = $False)]
+    [OutputType([PSCustomObject])]
     param(
     )
 
@@ -29,7 +30,6 @@ function Get-Ruby {
             $optRubies = "$([System.IO.Path]::DirectorySeparatorChar)$optRubies"
         }
         $search = @($optRubies, (Join-Path $Env:HOME '.rubies'))
-        $rubyVersions = @()
         $search | ForEach-Object {
             $dir = $_
             if (Test-Path $dir -PathType Container) {
@@ -39,15 +39,13 @@ function Get-Ruby {
                     if ($Env:RUBY_ROOT -and $Env:RUBY_ROOT -eq $versionDir.FullName) {
                         $active = $True
                     }
-                    $rubyVersion = @{
+                    [PSCustomObject]@{
                         'Version'  = $versionDir.Name
                         'Active'   = $active
                         'Location' = $versionDir
                     }
-                    $rubyVersions += [PSCustomObject]$rubyVersion
                 }
             }
         }
-        $rubyVersions
     }
 }

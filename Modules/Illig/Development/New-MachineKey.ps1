@@ -15,6 +15,9 @@
 function New-MachineKey {
     [CmdletBinding(HelpUri = 'https://support.microsoft.com/en-us/kb/2915218#AppendixA')]
     [OutputType([String])]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Generates and returns a string; no state is changed.')]
     param
     (
         [ValidateSet('AES', 'DES', '3DES')]

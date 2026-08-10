@@ -40,11 +40,7 @@ function Export-PostmanItem {
         $ApiKey,
 
         [Parameter(Mandatory = $True)]
-        [ArgumentCompleter({
-                param($commandName, $parameterName, $stringMatch)
-                enum ItemType { Collection = 1; Environment = 2; }
-                [ItemType].GetEnumValues() | Where-Object { $_.ToString().StartsWith($stringMatch) }
-            })]
+        [ArgumentCompletions('Collection', 'Environment')]
         [ValidateScript({
                 enum ItemType { Collection = 1; Environment = 2; }
                 [ItemType]$_
@@ -70,7 +66,7 @@ function Export-PostmanItem {
             'X-API-Key'    = $ApiKey
         }
 
-        function Get-Workspaces {
+        function Get-Workspace {
             Invoke-RestMethod -Uri "$baseUrl/workspaces" -Headers $headers
         }
 
@@ -83,23 +79,23 @@ function Export-PostmanItem {
         .PARAMETER obj
             The PSObject with properties to iterate/recurse over.
         #>
-        function Remove-IdProperty {
+        function Clear-IdProperty {
             param([PSObject] $obj)
             $obj.Properties.Remove('id')
             $obj.Members | Where-Object { $_.MemberType -eq 'NoteProperty' } | ForEach-Object {
                 $member = $_
                 if ($member.TypeNameOfValue -eq 'System.Object[]' ) {
                     $member.Value | ForEach-Object {
-                        Remove-IdProperty $_.PSObject
+                        Clear-IdProperty $_.PSObject
                     }
                 }
                 elseif ($member.TypeNameOfValue -eq 'System.Management.Automation.PSCustomObject') {
-                    Remove-IdProperty $member.Value.PSObject
+                    Clear-IdProperty $member.Value.PSObject
                 }
             }
         }
 
-        $allWorkspaces = Get-Workspaces | Select-Object -ExpandProperty 'workspaces'
+        $allWorkspaces = Get-Workspace | Select-Object -ExpandProperty 'workspaces'
     }
 
     process {
@@ -133,7 +129,7 @@ function Export-PostmanItem {
 
         if ([ItemType]::Collection -eq $ItemType) {
             $itemToExport.info.PSObject.Properties.Remove('updatedAt')
-            Remove-IdProperty $itemToExport.PSObject
+            Clear-IdProperty $itemToExport.PSObject
         }
         else {
             $itemToExport | Add-Member -MemberType NoteProperty -Name '_postman_exported_at' -Value (Get-Date -AsUTC -Format o)

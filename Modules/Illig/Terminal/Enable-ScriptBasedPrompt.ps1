@@ -12,6 +12,9 @@
 #>
 function Enable-ScriptBasedPrompt {
     [CmdletBinding(SupportsShouldProcess = $False)]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '',
+        Justification = 'A prompt renders colored segments directly to the host by design.')]
     param()
     begin {
         Import-Module posh-git

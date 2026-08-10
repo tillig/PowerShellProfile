@@ -62,13 +62,7 @@ function Get-GitBranchReport {
             if (-not $IncludeMain) {
                 $branches = $branches | Where-Object {
                     $branch = $_
-                    $allow = $True
-                    $MainBranches | ForEach-Object {
-                        if ($branch.EndsWith($_)) {
-                            $allow = $False
-                        }
-                    }
-                    $allow
+                    -not ($MainBranches | Where-Object { $branch.EndsWith($_) })
                 }
             }
 
@@ -89,7 +83,6 @@ function Get-GitBranchReport {
             }
 
             $report | Sort-Object { $_.Date }
-            Write-Host '?'
         }
         finally {
             Pop-Location

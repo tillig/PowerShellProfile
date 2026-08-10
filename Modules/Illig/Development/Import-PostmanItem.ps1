@@ -41,11 +41,7 @@ function Import-PostmanItem {
         $ApiKey,
 
         [Parameter(Mandatory = $True)]
-        [ArgumentCompleter({
-                param($commandName, $parameterName, $stringMatch)
-                enum ItemType { Collection = 1; Environment = 2; }
-                [ItemType].GetEnumValues() | Where-Object { $_.ToString().StartsWith($stringMatch) }
-            })]
+        [ArgumentCompletions('Collection', 'Environment')]
         [ValidateScript({
                 enum ItemType { Collection = 1; Environment = 2; }
                 [ItemType]$_
@@ -76,11 +72,11 @@ function Import-PostmanItem {
             'X-API-Key'    = $ApiKey
         }
 
-        function Get-Workspaces {
+        function Get-Workspace {
             Invoke-RestMethod -Uri "$baseUrl/workspaces" -Headers $headers
         }
 
-        $allWorkspaces = Get-Workspaces | Select-Object -ExpandProperty 'workspaces'
+        $allWorkspaces = Get-Workspace | Select-Object -ExpandProperty 'workspaces'
     }
 
     process {

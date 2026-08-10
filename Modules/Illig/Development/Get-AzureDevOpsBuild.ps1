@@ -60,6 +60,11 @@ function Get-AzureDevOpsBuild {
         }
 
         function Get-PipelineRun {
+            param(
+                [string] $Organization,
+                [string] $Project,
+                [string] $BuildId
+            )
             Write-Verbose "Querying Azure DevOps for pipeline run $BuildId in $Organization/$Project."
             $pipeline = az pipelines build show --org $Organization --project $Project --id $buildId | ConvertFrom-Json -Depth 10
             if ($LASTEXITCODE -ne 0) {
@@ -129,10 +134,12 @@ function Get-AzureDevOpsBuild {
 
         function Out-Report {
             param(
-                [AzureDevOpsPipelineRun] $PipelineRun
+                [AzureDevOpsPipelineRun] $PipelineRun,
+                [string] $Organization,
+                [string] $Project
             )
             Write-Output "$($PipelineRun.Name) - $($PipelineRun.Id) [$($PipelineRun.ReportTime.ToLocalTime().ToString('HH:mm:ss'))]"
-            Out-ReportSteps -Steps $PipelineRun.Timeline
+            Out-ReportStep -Steps $PipelineRun.Timeline
             if ($PipelineRun.State -eq 'completed') {
                 Write-Output "Status: $($PipelineRun.State) / $($PipelineRun.Result)"
             }
@@ -143,7 +150,7 @@ function Get-AzureDevOpsBuild {
             Write-Output "$Organization/$([System.Net.WebUtility]::UrlEncode($Project).Replace('+','%20'))/_build/results?buildId=$($PipelineRun.Id)&view=results"
         }
 
-        function Out-ReportSteps {
+        function Out-ReportStep {
             param(
                 [AzureDevOpsPipelineStep[]] $Steps,
                 [int] $Indent = 0
@@ -189,16 +196,15 @@ function Get-AzureDevOpsBuild {
                     Write-Output "$indentString$result $($step.Name) [$startTime]$errors$warnings"
                 }
 
-                Out-ReportSteps -Steps $step.Children -Indent ($Indent + 2)
+                Out-ReportStep -Steps $step.Children -Indent ($Indent + 2)
             }
         }
-
     }
     process {
         do {
-            $pipelineRun = Get-PipelineRun
+            $pipelineRun = Get-PipelineRun -Organization $Organization -Project $Project -BuildId $BuildId
             if ($ReportFormat) {
-                Out-Report -PipelineRun $pipelineRun
+                Out-Report -PipelineRun $pipelineRun -Organization $Organization -Project $Project
             }
             else {
                 $pipelineRun
@@ -206,8 +212,8 @@ function Get-AzureDevOpsBuild {
 
             if ($Watch -and $pipelineRun.State -ne 'completed') {
                 if ($ReportFormat) {
-                    Write-Host "Refreshing in $RefreshIntervalSeconds seconds..."
-                    Write-Host '========================================'
+                    Write-Output "Refreshing in $RefreshIntervalSeconds seconds..."
+                    Write-Output '========================================'
                 }
 
                 Start-Sleep -Seconds $RefreshIntervalSeconds

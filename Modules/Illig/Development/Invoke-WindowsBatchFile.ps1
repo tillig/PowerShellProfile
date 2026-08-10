@@ -40,30 +40,32 @@ function Invoke-WindowsBatchFile {
         [switch]
         $Silent)
 
-    $tempFile = [IO.Path]::GetTempFileName()
+    process {
+        $tempFile = [IO.Path]::GetTempFileName()
 
-    ## Store the output of cmd.exe.  We also ask cmd.exe to output
-    ## the environment table after the batch file completes
-    cmd.exe /c " `"$Path`" $Parameters && set " > $tempFile
+        ## Store the output of cmd.exe.  We also ask cmd.exe to output
+        ## the environment table after the batch file completes
+        cmd.exe /c " `"$Path`" $Parameters && set " > $tempFile
 
-    ## Go through the environment variables in the temp file.
-    ## For each of them, set the variable in our local environment.
-    $verboseOutput = 'Output:'
-    if ($Silent) {
-        $verboseOutput = '[Silenced] ' + $verboseOutput
-    }
-    Get-Content $tempFile | ForEach-Object {
-        if ($_ -match '^(.*?)=(.*)$') {
-            Set-Content "env:\$($matches[1])" $matches[2]
-            Write-Verbose "Environment variable: $($matches[1]) = $($matches[2])"
+        ## Go through the environment variables in the temp file.
+        ## For each of them, set the variable in our local environment.
+        $verboseOutput = 'Output:'
+        if ($Silent) {
+            $verboseOutput = '[Silenced] ' + $verboseOutput
         }
-        else {
-            Write-Verbose "$verboseOutput $_"
-            if (-not $Silent) {
-                $_
+        Get-Content $tempFile | ForEach-Object {
+            if ($_ -match '^(.*?)=(.*)$') {
+                Set-Content "env:\$($matches[1])" $matches[2]
+                Write-Verbose "Environment variable: $($matches[1]) = $($matches[2])"
+            }
+            else {
+                Write-Verbose "$verboseOutput $_"
+                if (-not $Silent) {
+                    $_
+                }
             }
         }
-    }
 
-    Remove-Item $tempFile
+        Remove-Item $tempFile
+    }
 }

@@ -17,6 +17,7 @@
 #>
 function Optimize-PSReadlineHistory {
     [CmdletBinding(SupportsShouldProcess = $true)]
+    [OutputType([Hashtable])]
     param(
         # Path to the PSReadline history file to optimize.
         [Parameter()]
@@ -81,7 +82,6 @@ function Optimize-PSReadlineHistory {
     $activityMsg = "${whatIfMsg}Optimizing $HistoryPath"
 
     # Process multiline commands in the history file contents
-    $Ten
     for ($i = 0; $i -lt $history.Count; $i++) {
         $percentComplete = [int](33 * (($i + 1) / $history.Count))
         if ($percentComplete % 10 -eq 0) {
