@@ -1,4 +1,4 @@
-<#
+﻿<#
 .Synopsis
    Creates a new machine key element for use in web.config files.
 .PARAMETER Decryption
@@ -15,7 +15,7 @@
 
 function Test-AnsiSupport {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([Boolean])]
     param
     (
     )
