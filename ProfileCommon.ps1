@@ -67,7 +67,7 @@ if ($IsMacOS -and ($null -ne (Get-Command 'brew' -ErrorAction Ignore))) {
     Write-ProfileLog 'Homebrew shell environment'
     # Uncomment this if you re-enable the brew shell completions below.
     # $script:brewPrefix = & brew --prefix
-    $(brew shellenv) | Invoke-Expression
+    . ([scriptblock]::Create((& brew shellenv | Out-String)))
     Write-ProfileLog 'Homebrew shell environment complete'
 }
 
@@ -89,6 +89,8 @@ if ($?) {
     Write-ProfileLog 'dotnet completion registration'
     Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock {
         param($commandName, $wordToComplete, $cursorPosition)
+        # Signature is fixed by Register-ArgumentCompleter; not all params are used.
+        $null = $commandName
         dotnet complete --position $cursorPosition "$wordToComplete" | ForEach-Object {
             [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }
@@ -103,6 +105,8 @@ if ($?) {
 Write-ProfileLog 'Registering deferred git-completion'
 Register-ArgumentCompleter -Native -CommandName git -ScriptBlock {
     param($wordToComplete, $commandAst, $cursorPosition)
+    # Signature is fixed by Register-ArgumentCompleter; the full AST is used instead.
+    $null = $wordToComplete
     Import-Module git-completion -Global
     $line = $commandAst.ToString()
     $result = [System.Management.Automation.CommandCompletion]::CompleteInput($line, $cursorPosition, $null)
@@ -116,7 +120,7 @@ Write-ProfileLog 'Native completions (helm, istioctl, k9s, kubectl, etc.)'
     $command = $_
     if (Get-Command $command -ErrorAction SilentlyContinue) {
         Write-ProfileLog "  Generating completions for $command"
-        & $command completion powershell | Out-String | Invoke-Expression
+        . ([scriptblock]::Create((& $command completion powershell | Out-String)))
         Write-ProfileLog "  Completions for $command complete"
     }
 }
@@ -128,6 +132,8 @@ if ($null -ne (Get-Command 'az' -ErrorAction Ignore)) {
     Write-ProfileLog 'az CLI completion registration'
     Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
         param($commandName, $wordToComplete, $cursorPosition)
+        # Signature is fixed by Register-ArgumentCompleter; not all params are used.
+        $null = $commandName
         $completion_file = New-TemporaryFile
         $env:ARGCOMPLETE_USE_TEMPFILES = 1
         $env:_ARGCOMPLETE_STDOUT_FILENAME = $completion_file

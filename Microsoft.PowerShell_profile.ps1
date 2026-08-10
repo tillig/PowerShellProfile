@@ -3,11 +3,19 @@
 # oh-my-posh v3
 # This will run every time the prompt displays so it's important to keep it fast.
 function Set-PromptContext {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Runs on every prompt render; prompting for confirmation is not possible.')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSAvoidUsingWriteHost', '',
+        Justification = 'Emits iTerm2 terminal control sequences, not user-facing output.')]
+    param()
+
     # Enable the git segment to indicate if pre-commit is installed.
     if (Get-Command git -ErrorAction SilentlyContinue) {
         $repoRoot = git rev-parse --show-toplevel 2>&1
         if ($LASTEXITCODE -eq 0) {
-            $preCommitHook = Test-Path (Join-Path $repoRoot '.git' 'hooks' 'pre-commit')
+            $preCommitHook = Test-Path (Join-Path -Path $repoRoot -ChildPath '.git' -AdditionalChildPath 'hooks', 'pre-commit')
             $env:PRE_COMMIT_INSTALLED = @{ $true = '✓'; $false = '' }[$preCommitHook]
         }
     }
@@ -28,7 +36,7 @@ function Set-PromptContext {
 
 Write-ProfileLog 'oh-my-posh initialization'
 if ($null -ne (Get-Command 'oh-my-posh' -ErrorAction Ignore)) {
-    oh-my-posh init pwsh --config $PSScriptRoot/themes/illig.json | Invoke-Expression
+    . ([scriptblock]::Create((oh-my-posh init pwsh --config $PSScriptRoot/themes/illig.json | Out-String)))
     New-Alias -Name 'Set-PoshContext' -Value 'Set-PromptContext' -Scope Global
 }
 else {
