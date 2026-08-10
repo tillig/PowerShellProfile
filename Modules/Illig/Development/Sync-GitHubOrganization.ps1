@@ -9,7 +9,8 @@
     folder for that repo, a `git clone` will happen for the repo.
 
     If there are folders that don't match a repo, a warning will be written
-    about those to indicate it may be a stale or renamed repo.
+    about those to indicate it may be a stale or renamed repo. Use
+    `-RemoveNonRepositoryFolder` to be prompted to delete those folders instead.
 .PARAMETER Path
     The location to serve as the root for the set of clones.
 .PARAMETER Organization
@@ -32,8 +33,14 @@
 .PARAMETER Force
     Include archived repositories in the synchronization. By default, archived
     repositories are skipped.
+.PARAMETER RemoveNonRepositoryFolder
+    Prompt to delete folders that don't match a repository in the organization
+    instead of just warning about them. There is always a prompt for each
+    folder - nothing is deleted without confirmation.
 .EXAMPLE
    Sync-GitHubOrganization -Organization "Autofac"
+.EXAMPLE
+   Sync-GitHubOrganization -Organization "Autofac" -RemoveNonRepositoryFolder
 .EXAMPLE
    Sync-GitHubOrganization `
      -Organization "Autofac" `
@@ -47,7 +54,7 @@
 #>
 function Sync-GitHubOrganization {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Scope = 'Function')]
-    [CmdletBinding(SupportsShouldProcess = $True)]
+    [CmdletBinding(SupportsShouldProcess = $True, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $False)]
         [string]
@@ -78,7 +85,11 @@ function Sync-GitHubOrganization {
 
         [Parameter(Mandatory = $False)]
         [switch]
-        $Force
+        $Force,
+
+        [Parameter(Mandatory = $False)]
+        [switch]
+        $RemoveNonRepositoryFolder
     )
     begin {
         $git = Get-Command git -ErrorAction Ignore
@@ -164,28 +175,8 @@ function Sync-GitHubOrganization {
 
             # Not using Update-GitRepository because we need to separate the git
             # pull from the removal of local branches.
-            #
-            # ShouldProcess can't be called inside ForEach-Object -Parallel, so
-            # determine which repos to update/clone sequentially, then run the
-            # git operations in parallel.
             Write-Verbose "Synchronizing $($filteredRepos.Count) of $($repos.Count) repositories."
-            $reposToUpdate = @()
-            $reposToClone = @()
-            foreach ($repo in $filteredRepos) {
-                $repoName = $repo.name
-                if ($currentFolders -contains $repoName) {
-                    if ($PSCmdlet.ShouldProcess($repoName, 'git pull')) {
-                        $reposToUpdate += $repo
-                    }
-                }
-                else {
-                    if ($PSCmdlet.ShouldProcess($repoName, 'git clone')) {
-                        $reposToClone += $repo
-                    }
-                }
-            }
-
-            ($reposToUpdate + $reposToClone) | ForEach-Object -ThrottleLimit 10 -Parallel {
+            $filteredRepos | ForEach-Object -ThrottleLimit 10 -Parallel {
                 $repo = $_
                 $repoName = $repo.name
                 $currentFolders = $using:currentFolders
@@ -232,8 +223,20 @@ function Sync-GitHubOrganization {
             $currentFolders | ForEach-Object {
                 $folderName = $_
                 $found = $repos | Where-Object { $_.name -eq $folderName }
-                if (-not $found) {
+                if ($found) {
+                    return
+                }
+
+                if (-not $RemoveNonRepositoryFolder) {
                     Write-Warning "$folderName is not a repo."
+                    return
+                }
+
+                # ConfirmImpact is High on this function so the delete always
+                # prompts - nothing is removed without confirmation.
+                $folderPath = Join-Path -Path $PWD -ChildPath $folderName
+                if ($PSCmdlet.ShouldProcess($folderPath, 'Remove folder that is not a repo')) {
+                    Remove-Item -LiteralPath $folderPath -Recurse -Force
                 }
             }
         }

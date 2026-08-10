@@ -9,7 +9,8 @@
     folder for that repo, a `git clone` will happen for the repo.
 
     If there are folders that don't match a repo, a warning will be written
-    about those to indicate it may be a stale or renamed repo.
+    about those to indicate it may be a stale or renamed repo. Use
+    `-RemoveNonRepositoryFolder` to be prompted to delete those folders instead.
 .PARAMETER Path
     The location to serve as the root for the set of clones.
 .PARAMETER Organization
@@ -20,12 +21,22 @@
     A list of one or more regular expression strings. If a repository name
     matches any of these expressions, it won't be synchronized unless there's
     already a folder/clone matching that name (e.g., you manually cloned it).
+.PARAMETER RemoveNonRepositoryFolder
+    Prompt to delete folders that don't match a repository in the project
+    instead of just warning about them. There is always a prompt for each
+    folder - nothing is deleted without confirmation.
 .EXAMPLE
    Sync-AzureDevOpsProject -Organization https://dev.azure.com/MyOrg -Project "My Project"
+.EXAMPLE
+   Sync-AzureDevOpsProject `
+     -Organization https://dev.azure.com/MyOrg `
+     -Project "My Project" `
+     -RemoveNonRepositoryFolder
 #>
 function Sync-AzureDevOpsProject {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Scope = 'Function')]
-    [CmdletBinding(SupportsShouldProcess = $True)]
+    [CmdletBinding(SupportsShouldProcess = $True,
+        ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory = $False)]
         [string]
@@ -44,7 +55,11 @@ function Sync-AzureDevOpsProject {
 
         [Parameter(Mandatory = $False)]
         [string[]]
-        $Exclude
+        $Exclude,
+
+        [Parameter(Mandatory = $False)]
+        [switch]
+        $RemoveNonRepositoryFolder
     )
     begin {
         $git = Get-Command git -ErrorAction Ignore
@@ -153,8 +168,20 @@ function Sync-AzureDevOpsProject {
             $currentFolders | ForEach-Object {
                 $folderName = $_
                 $found = $repos | Where-Object { $_.name -eq $folderName }
-                if (-not $found) {
+                if ($found) {
+                    return
+                }
+
+                if (-not $RemoveNonRepositoryFolder) {
                     Write-Warning "$folderName is not a repo."
+                    return
+                }
+
+                # ConfirmImpact is High on this function so the delete always
+                # prompts - nothing is removed without confirmation.
+                $folderPath = Join-Path -Path $PWD -ChildPath $folderName
+                if ($PSCmdlet.ShouldProcess($folderPath, 'Remove folder that is not a repo')) {
+                    Remove-Item -LiteralPath $folderPath -Recurse -Force
                 }
             }
         }
