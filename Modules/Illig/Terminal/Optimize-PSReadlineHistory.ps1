@@ -171,14 +171,15 @@ function Optimize-PSReadlineHistory {
     }
 
     $strBld = $commands = $uniqCommands = $null
-
-    Write-Host "Removed $($numCommands - $numUniqCommands) duplicate commands."
-    if ($MinimumCommandLength -gt 0) {
-        Write-Host "Removed $numMinLengthCommandsRemoved commands with less than $MinimumCommandLength characters."
-    }
-    Write-Host "Number of commands reduced from $numCommands to $numUniqCommands."
-    Write-Host "Number of multiline commands $numMultilineCommands."
-    Write-Host ('History file size reduced from {0:F1} KB to {1:F1} KB.' -f ($origFileSize / 1KB), ($newFileSize / 1KB))
-
     Write-Progress -Activity $activityMsg -Completed
+
+    @{
+        RemovedDuplicateCommands = $numCommands - $numUniqCommands
+        RemovedShortCommands     = $numMinLengthCommandsRemoved
+        OriginalCommandCount     = $numCommands
+        UniqueCommandCount       = $numUniqCommands
+        MultilineCommandCount    = $numMultilineCommands
+        OriginalFileSize         = $origFileSize
+        NewFileSize              = $newFileSize
+    }
 }
