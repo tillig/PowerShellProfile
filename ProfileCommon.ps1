@@ -98,19 +98,23 @@ if ($?) {
     Write-ProfileLog 'dotnet completion registration complete'
 }
 
-# Lazy-load git-completion: register a placeholder completer that imports the
-# module on first Tab, then re-invokes completion so results appear immediately.
-# After this runs once, the real git-completion completer will be registered and
-# this placeholder will be ignored.
+# Lazy-load git-completion: import the module on first Tab, then delegate to it.
+# As of git-completion 2.0.0 the module no longer registers a completer itself, so
+# this block stays in place permanently and calls Complete-Git directly. Don't call
+# CommandCompletion::CompleteInput here - it would re-enter this same completer and
+# recurse until Tab appears to hang.
 Write-ProfileLog 'Registering deferred git-completion'
+$global:GitCompletionSettings = @{
+    ShowAllCommand     = $true
+    AdditionalCommands = [string[]]@('force-pull', 'branch-diff')
+}
 Register-ArgumentCompleter -Native -CommandName git -ScriptBlock {
     param($wordToComplete, $commandAst, $cursorPosition)
     # Signature is fixed by Register-ArgumentCompleter; the full AST is used instead.
     $null = $wordToComplete
     Import-Module git-completion -Global
-    $line = $commandAst.ToString()
-    $result = [System.Management.Automation.CommandCompletion]::CompleteInput($line, $cursorPosition, $null)
-    $result.CompletionMatches
+    Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
+    Complete-Git -CommandAst $commandAst -CursorPosition $cursorPosition
 }
 Write-ProfileLog 'Deferred git-completion registered'
 
