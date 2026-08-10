@@ -89,7 +89,7 @@ function Remove-GitLocalOnly {
                 }
 
                 $Operation = if ($IsCurrent) { "Switch to $SwitchTarget, then remove branch with no upstream" } else { 'Remove branch with no upstream' }
-                if (-not $pscmdlet.ShouldProcess("$Name ($Path)", $Operation)) {
+                if (-not $PSCmdlet.ShouldProcess("$Name ($Path)", $Operation)) {
                     return
                 }
 

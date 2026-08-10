@@ -1,4 +1,4 @@
-<#
+﻿<#
 .Synopsis
    Clears out temporary folders.
 .DESCRIPTION
@@ -28,7 +28,7 @@ function Remove-TempFiles {
     }
     process {
         foreach ($tempFolder in $tempFolders) {
-            if ((Test-Path $tempFolder) -and ($pscmdlet.ShouldProcess("$tempFolder", 'Remove items from temporary folder'))) {
+            if ((Test-Path $tempFolder) -and ($PSCmdlet.ShouldProcess("$tempFolder", 'Remove items from temporary folder'))) {
                 Get-ChildItem $tempFolder | Remove-Item -Force -Recurse
             }
         }

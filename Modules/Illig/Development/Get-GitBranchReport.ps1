@@ -31,9 +31,8 @@
     If specified, the primary dev branches are included.
 #>
 function Get-GitBranchReport {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Scope='Function', Target='allow')]
     [CmdletBinding(SupportsShouldProcess = $True)]
-    Param(
+    param(
         [Parameter(Mandatory = $False, Position = 0)]
         [string]
         [ValidateNotNullOrEmpty()]
@@ -43,29 +42,29 @@ function Get-GitBranchReport {
         [switch]
         $IncludeMain
     )
-    Begin {
-        $MainBranches = @("/main", "/master", "/develop")
+    begin {
+        $MainBranches = @('/main', '/master', '/develop')
         $git = Get-Command git -ErrorAction Ignore
         if ($Null -eq $git) {
-            Write-Error "Unable to locate git."
-            Exit 1
+            Write-Error 'Unable to locate git.'
+            exit 1
         }
 
-        If (-not (Test-Path $Path)) {
+        if (-not (Test-Path $Path)) {
             Write-Error "Unable to find path $Path"
-            Exit 1
+            exit 1
         }
     }
-    Process {
-        Try {
+    process {
+        try {
             Push-Location $Path
-            $branches = git branch -r --format "%(refname)" | Where-Object { -Not $_.EndsWith("/HEAD") }
-            If (-Not $IncludeMain) {
+            $branches = git branch -r --format '%(refname)' | Where-Object { -not $_.EndsWith('/HEAD') }
+            if (-not $IncludeMain) {
                 $branches = $branches | Where-Object {
                     $branch = $_
                     $allow = $True
                     $MainBranches | ForEach-Object {
-                        If ($branch.EndsWith($_)) {
+                        if ($branch.EndsWith($_)) {
                             $allow = $False
                         }
                     }
@@ -77,21 +76,22 @@ function Get-GitBranchReport {
             $branches | ForEach-Object {
                 $branch = $_
 
-                # Fix CHECKFREE\user -> CHECKFREE\\user
+                # Fix DOMAIN\user -> DOMAIN\\user
                 # The replacement looks weird but the first param is a regex (escaped) and the second is a literal string.
-                $branchInfo = git show --format="{`"Date`":`"%ai`",`"Relative`":`"%ar`",`"Author`":`"%an`"}" $_ | Select-Object -First 1 | ForEach-Object { $_ -replace '\\','\\' } | ConvertFrom-Json
+                $branchInfo = git show --format="{`"Date`":`"%ai`",`"Relative`":`"%ar`",`"Author`":`"%an`"}" $_ | Select-Object -First 1 | ForEach-Object { $_ -replace '\\', '\\' } | ConvertFrom-Json
                 $reportObject = [PSCustomObject]@{
-                    Branch = $branch.Replace("refs/remotes/origin/","")
-                    Date = [System.DateTimeOffset]::Parse($branchInfo.Date).ToLocalTime()
+                    Branch   = $branch.Replace('refs/remotes/origin/', '')
+                    Date     = [System.DateTimeOffset]::Parse($branchInfo.Date).ToLocalTime()
                     Relative = $branchInfo.Relative
-                    Author = $branchInfo.Author
+                    Author   = $branchInfo.Author
                 }
                 $report += $reportObject
             }
 
             $report | Sort-Object { $_.Date }
+            Write-Host '?'
         }
-        Finally {
+        finally {
             Pop-Location
         }
     }
