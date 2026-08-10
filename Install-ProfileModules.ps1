@@ -6,7 +6,7 @@ $modules = @(
     @{ Name = 'PSBashCompletions' },
     @{ Name = 'Terminal-Icons' },
 
-    # Pinned - the PowerShell extension for VS Code doesn't work with 1.25.0.
+    # Pinned - the PowerShell extension 2025.x for VS Code doesn't work with 1.25.0.
     @{ Name = 'PSScriptAnalyzer'; RequiredVersion = '1.24.0' }
  )
 
