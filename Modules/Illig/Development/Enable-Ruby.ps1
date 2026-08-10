@@ -86,7 +86,7 @@ puts "}"
 '@
             $rubyInfo = ($script | & $exePath) | ConvertFrom-Json
 
-            $gemHome = Join-Path $Env:HOME '.gem' $rubyInfo.ruby_engine $rubyInfo.ruby_version
+            $gemHome = Join-Path -Path $Env:HOME -ChildPath '.gem' -AdditionalChildPath $rubyInfo.ruby_engine, $rubyInfo.ruby_version
             Write-Verbose "Setting GEM_HOME to $gemHome"
             [Environment]::SetEnvironmentVariable('GEM_HOME', $gemHome)
 
