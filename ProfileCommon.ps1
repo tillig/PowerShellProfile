@@ -83,6 +83,9 @@ if ($null -ne (Get-Command 'nvs' -ErrorAction Ignore)) {
     Write-ProfileLog 'nvs auto version switching complete'
 }
 
+# Use nice menu completion for Tab instead of the default completion.
+Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
+
 # PowerShell parameter completion shim for the dotnet CLI
 Get-Command dotnet -ErrorAction Ignore | Out-Null
 if ($?) {
@@ -113,7 +116,6 @@ Register-ArgumentCompleter -Native -CommandName git -ScriptBlock {
     # Signature is fixed by Register-ArgumentCompleter; the full AST is used instead.
     $null = $wordToComplete
     Import-Module git-completion -Global
-    Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
     Complete-Git -CommandAst $commandAst -CursorPosition $cursorPosition
 }
 Write-ProfileLog 'Deferred git-completion registered'
