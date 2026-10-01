@@ -4,7 +4,8 @@
 .DESCRIPTION
     Executes `git pull -p` on a Git repo location to pull and prune branches.
     Subsequently runs the Remove-GitLocalOnly command to remove local tracking
-    branches that don't exist on the remote anymore.
+    branches, and any worktrees holding them, that don't exist on the remote
+    anymore.
 .PARAMETER Path
     The location with branches to remove.
 .EXAMPLE

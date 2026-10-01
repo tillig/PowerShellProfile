@@ -9,9 +9,11 @@
     Git won't delete a branch that's checked out. If the branch to remove is the
     one currently checked out, this switches to the default branch (from
     'origin/HEAD', falling back to 'main,' 'master,' or 'develop') before
-    removing it. Branches that can't be freed up - checked out in another
-    worktree, or blocked by uncommitted changes - are skipped with a warning so
-    the remaining branches and repositories still get processed.
+    removing it. If the branch is checked out in a linked worktree, that
+    worktree is removed first. Branches that can't be freed up - checked out in
+    the main worktree, or blocked by uncommitted changes or a locked worktree -
+    are skipped with a warning so the remaining branches and repositories still
+    get processed.
 .PARAMETER Path
     The location with branches to remove.
 .EXAMPLE
@@ -74,12 +76,16 @@ function Remove-GitLocalOnly {
                 $SwitchTarget = $Preferred | Where-Object { $Candidates -contains $_ } | Select-Object -First 1
             }
 
+            # The first entry is always the main worktree, which git can't remove.
+            $MainWorktree = (&git worktree list --porcelain | Select-Object -First 1) -replace '^worktree ', ''
+
             $LocalOnlyBranches | ForEach-Object {
                 $LocalBranch = $_
                 $Name = $LocalBranch.Name
                 $IsCurrent = $LocalBranch.Current -eq '*'
-                if ((-not $IsCurrent) -and ($LocalBranch.Worktree.Length -gt 0)) {
-                    Write-Warning "Skipping '$Name' ($Path) - checked out in worktree at '$($LocalBranch.Worktree)'. Remove that worktree and re-run."
+                $Worktree = if ($IsCurrent) { '' } else { $LocalBranch.Worktree }
+                if ($Worktree -eq $MainWorktree) {
+                    Write-Warning "Skipping '$Name' ($Path) - checked out in the main worktree at '$Worktree'. Switch away there and re-run."
                     return
                 }
 
@@ -88,7 +94,15 @@ function Remove-GitLocalOnly {
                     return
                 }
 
-                $Operation = if ($IsCurrent) { "Switch to $SwitchTarget, then remove branch with no upstream" } else { 'Remove branch with no upstream' }
+                $Operation = if ($IsCurrent) {
+                    "Switch to $SwitchTarget, then remove branch with no upstream"
+                }
+                elseif ($Worktree.Length -gt 0) {
+                    "Remove worktree at $Worktree, then remove branch with no upstream"
+                }
+                else {
+                    'Remove branch with no upstream'
+                }
                 if (-not $PSCmdlet.ShouldProcess("$Name ($Path)", $Operation)) {
                     return
                 }
@@ -98,6 +112,15 @@ function Remove-GitLocalOnly {
                     &git switch $SwitchTarget
                     if ($LASTEXITCODE -ne 0) {
                         Write-Warning "Skipping '$Name' ($Path) - unable to switch to '$SwitchTarget'. Commit or stash your changes and re-run."
+                        return
+                    }
+                }
+
+                if ($Worktree.Length -gt 0) {
+                    Write-Verbose "Removing worktree at $Worktree before removing $Name."
+                    &git worktree remove $Worktree
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Warning "Skipping '$Name' ($Path) - unable to remove worktree at '$Worktree'. Commit, stash, or unlock it and re-run."
                         return
                     }
                 }
